@@ -1,0 +1,4 @@
+com.forgerock.sapi.gateway.framework.configuration.ConfigurationManager
+com.forgerock.sapi.gateway.framework.extensions.junit.EnabledIfVersionCondition
+
+
