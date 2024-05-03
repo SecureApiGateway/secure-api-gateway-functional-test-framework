@@ -12,8 +12,8 @@
     "scopesToAccessSsa": "ASPSPReadAccess TPPReadAccess AuthoritiesReadAccess",
     "api_clients": [
       {
-        "org_id": "0015800001041REAAY",
-        "software_id": "Y6NjA9TOn3aMm9GaPtLwkp",
+        "org_id": "{{API_PROVIDER_ORG_ID}",
+        "software_id": "{{API_PROVIDER_SOFTWARE_ID}}",
         "publicTransportKeyID": "52TVNALuXKCYzvxgBALeDVp966I",
         "publicTransportPemPath": "./certificates/OBWac.pem",
         "privateTransportPemPath": "./certificates/OBWac.key",

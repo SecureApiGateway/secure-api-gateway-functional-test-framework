@@ -21,6 +21,17 @@ fun doVariableSubstitution(systemDependenciesConfig: ExternalSystemDependenciesC
     systemDependenciesConfig.trustedDirectory.scopesToAccessSsa =
         substituteVariables(systemDependenciesConfig.trustedDirectory.scopesToAccessSsa, variables)
 
+    systemDependenciesConfig.trustedDirectory.apiClients.forEach {
+        it.orgId = substituteVariables(it.orgId, variables)
+        it.softwareId = substituteVariables(it.softwareId, variables)
+        it.publicSigningKeyID = substituteVariables(it.publicSigningKeyID, variables)
+        it.publicSigningPemPath = substituteVariables(it.publicSigningPemPath, variables)
+        it.privateSigningPemPath = substituteVariables(it.privateSigningPemPath, variables)
+        it.privateTransportPemPath = substituteVariables(it.privateTransportPemPath, variables)
+        it.publicTransportKeyID = substituteVariables(it.publicTransportKeyID, variables)
+        it.publicTransportPemPath = substituteVariables(it.publicTransportPemPath, variables)
+    }
+
     systemDependenciesConfig.apiUnderTest.name =
         substituteVariables(systemDependenciesConfig.apiUnderTest.name, variables)
     systemDependenciesConfig.apiUnderTest.serverDomain =

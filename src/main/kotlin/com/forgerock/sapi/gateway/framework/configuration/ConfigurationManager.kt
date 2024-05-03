@@ -95,7 +95,7 @@ class ConfigurationManager(private val filePath: String = EXTERNAL_SYSTEM_DEPEND
         doVariableSubstitution(config, variables)
 
         println("Creating TPP using ${config.trustedDirectory.name}")
-        for (apiClientConfig in config.trustedDirectory.ApiClients) {
+        for (apiClientConfig in config.trustedDirectory.apiClients) {
             val certificateProvider = FileCertificateProvider(apiClientConfig)
             val softwareStatementProvider = OAuth2SoftwareStatementProvider()
             val oauth2Server = OAuth2Server(config.trustedDirectory.openidWellKnown)

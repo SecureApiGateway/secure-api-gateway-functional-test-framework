@@ -25,7 +25,7 @@ class ProductionTrustedDirectory(
     // val oauth2Server: OAuth2Server = OAuth2Server(productionTrustedDirectoryConfig.openidWellKnown)
 
     init {
-        for (apiClientConfig in productionTrustedDirectoryConfig.ApiClients) {
+        for (apiClientConfig in productionTrustedDirectoryConfig.apiClients) {
             val apiClient = createApiClient(apiClientConfig)
             apiClients[apiClient.name] = apiClient
         }

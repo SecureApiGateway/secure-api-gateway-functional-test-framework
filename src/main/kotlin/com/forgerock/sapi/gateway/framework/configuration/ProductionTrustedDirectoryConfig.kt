@@ -1,7 +1,7 @@
 package com.forgerock.sapi.gateway.framework.configuration
 
 data class ProductionTrustedDirectoryConfig(
-    val ApiClients: List<ApiClientConfig>,
+    val apiClients: List<ApiClientConfig>,
     var name: String,
     var jwks_uri: String,
     var openidWellKnown: String,
