@@ -6,7 +6,6 @@ import assertk.assertions.isNotNull
 import assertk.assertions.isTrue
 import com.forgerock.sapi.gateway.common.constants.OAuth2AuthorizeRequestJwtClaims
 import com.forgerock.sapi.gateway.common.constants.OAuth2Constants
-import com.forgerock.sapi.gateway.framework.api.ApiUnderTest
 import com.forgerock.sapi.gateway.framework.apiclient.ApiClient
 import com.forgerock.sapi.gateway.framework.configuration.ConfigurationManager
 import com.forgerock.sapi.gateway.framework.data.RequestParameters
@@ -19,13 +18,12 @@ import com.nimbusds.jose.util.JSONObjectUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import java.util.*
+import java.util.UUID
 
 class ExampleTest : MultipleApiClientTest() {
 
     @BeforeEach
     fun beforeEach() {
-
     }
 
     @ParameterizedTest
@@ -36,7 +34,7 @@ class ExampleTest : MultipleApiClientTest() {
         val registrationResponse = apiClient.doDynamicClientRegistration(apiUnderTest)
         assertThat(registrationResponse).isNotNull()
 
-        val scopes = "openid"
+        val scopes = "openid accounts"
         val resourceOwner = apiUnderTest.resourceOwners[0]
         val responseTypes = "code id_token"
         val additionalClaims: List<Pair<String, Any>> = getPlainFapiClaims()
@@ -71,12 +69,4 @@ class ExampleTest : MultipleApiClientTest() {
         return listOf(claimPair, nonce, state)
     }
 
-    fun getAccessTokenWithConsent(apiClient: ApiClient, apiUnderTest: ApiUnderTest) {
-        val cookie = getCookie(apiUnderTest)
-
-    }
-
-    fun getCookie(apiUnderTest: ApiUnderTest) {
-
-    }
 }
