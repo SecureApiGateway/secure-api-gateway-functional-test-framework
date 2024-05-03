@@ -129,36 +129,6 @@ xjcGeneration {
     }
 }
 
-/** ************************************************* */
-/**                    profiles                       */
-/** ************************************************* */
-// @See README file
-// default environment profile
-var profile = "dev-ob"
-var profilePath = "gradle/profiles/profile-$profile.gradle.kts"
-
-if (project.hasProperty("profile")) {
-    profile = project.property("profile").toString()
-    profilePath = "gradle/profiles/profile-$profile.gradle.kts"
-    apply(from = profilePath)
-    println("Profile has been provided, profile [$profile][$profilePath] applied")
-} else {
-    apply(from = profilePath)
-    println("No profile provided, profile [$profile][$profilePath] applied")
-}
-// override profile properties from command line or system properties set
-println("Overriding properties by command line....")
-project.extra.properties.forEach { (key, _) ->
-    if (System.getProperties().containsKey(key)) {
-        println("* overriding [$key] sys prop")
-        project.extra[key] = System.getProperty(key)
-    }
-}
-
-project.extra["API_UNDER_TEST_SERVER_TLD"] = System.getenv("API_UNDER_TEST_SERVER_TLD")
-project.extra["API_PROVIDER_ORG_ID"] = System.getenv("API_PROVIDER_ORG_ID")
-project.extra["API_PROVIDER_SOFTWARE_ID"] = System.getenv("API_PROVIDER_SOFTWARE_ID")
-
 configure<SourceSetContainer> {
     named("main") {
         java.srcDir("src/main/kotlin")
@@ -209,20 +179,14 @@ tasks.register<Jar>("generateTestJar") {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
-
-    println("PROFILE --> $profile")
-    println("PROFILE FILE --> $profilePath")
     println("RUNNING task [$name]")
-    environment = project.extra.properties
-
-    group = "special-tasks-4tests"
 
     // execution conditions (see readme file)
     systemProperty("junit.platform.output.capture.stdout", "true")
     systemProperty("junit.jupiter.extensions.autodetection.enabled", "true")
     /* execution properties */
     // Indicates if this task will fail on the first failed test
-    failFast = true
+    failFast = false
     minHeapSize = "512M"
     maxHeapSize = "2G"
     // You can run your tests in parallel by setting this property to a value greater than 1
@@ -233,141 +197,4 @@ tasks.withType<Test>().configureEach {
 
     // Disable test output caching as these are integration tests and therefore are environment dependent
     outputs.upToDateWhen { false }
-}
-/* ********************************************* */
-/*                 TEST TASKS                    */
-/* ********************************************* */
-// tests properties
-val packagePrefix = "com.forgerock.sapi.gateway.ob.uk.tests.functional."
-val suffixPattern = ".*"
-val apiVersions = arrayOf("v3_1_8", "v3_1_9", "v3_1_10")
-
-// Add test tasks for each supported apiVersion
-for (apiVersion in apiVersions) {
-    /* ACCOUNTS */
-    tasks.register<Test>("accounts_$apiVersion") {
-        group = "accounts-tests"
-        description = "Runs the account tests with the version $apiVersion"
-        filter {
-            includeTestsMatching(packagePrefix + "account" + suffixPattern + apiVersion)
-        }
-        failFast = false
-    }
-
-    /* DOMESTIC PAYMENTS */
-    tasks.register<Test>("domestic_payments_$apiVersion") {
-        group = "payments-tests"
-        description = "Runs the domestic payments tests with the version $apiVersion"
-        filter {
-            includeTestsMatching(packagePrefix + "payment.domestic.payments" + suffixPattern + apiVersion)
-        }
-        failFast = false
-    }
-
-    tasks.register<Test>("domestic_scheduled_payments_$apiVersion") {
-        group = "payments-tests"
-        description = "Runs the domestic scheduled payments tests with the version $apiVersion"
-        filter {
-            includeTestsMatching(packagePrefix + "payment.domestic.scheduled.payments" + suffixPattern + apiVersion)
-        }
-        failFast = false
-    }
-
-    tasks.register<Test>("domestic_standing_order_$apiVersion") {
-        group = "payments-tests"
-        description = "Runs the domestic standing order tests with the version $apiVersion"
-        filter {
-            includeTestsMatching(packagePrefix + "payment.domestic.standing.order" + suffixPattern + apiVersion)
-        }
-        failFast = false
-    }
-
-    tasks.register<Test>("international_payments_$apiVersion") {
-        group = "payments-tests"
-        description = "Runs the international payments tests with the version $apiVersion"
-        filter {
-            includeTestsMatching(packagePrefix + "payment.international.payments" + suffixPattern + apiVersion)
-        }
-        failFast = false
-    }
-
-    tasks.register<Test>("international_scheduled_payments_$apiVersion") {
-        group = "payments-tests"
-        description = "Runs the international scheduled payments tests with the version $apiVersion"
-        filter {
-            includeTestsMatching(packagePrefix + "payment.international.scheduled.payments" + suffixPattern + apiVersion)
-        }
-        failFast = false
-    }
-
-    tasks.register<Test>("international_standing_orders_$apiVersion") {
-        group = "payments-tests"
-        description = "Runs the international standing order tests with the version $apiVersion"
-        filter {
-            includeTestsMatching(packagePrefix + "payment.international.standing.orders" + suffixPattern + apiVersion)
-        }
-        failFast = false
-    }
-
-    tasks.register<Test>("file_payments_$apiVersion") {
-        group = "payments-tests"
-        description = "Runs the file payments tests with the version $apiVersion"
-        filter {
-            includeTestsMatching(packagePrefix + "payment.file.payments" + suffixPattern + apiVersion)
-        }
-        failFast = false
-    }
-
-    /* FUNDS CONFIRMATIONS TESTS */
-    tasks.register<Test>("funds_confirmations_$apiVersion") {
-        group = "funds-confirmations-tests"
-        description = "Runs the funds confirmation tests with the version $apiVersion"
-        filter {
-            includeTestsMatching(packagePrefix + "funds" + suffixPattern + apiVersion)
-        }
-        failFast = false
-    }
-
-    /* ALL IMPLEMENTED TESTS */
-    tasks.register<Test>("tests_$apiVersion") {
-        group = "tests"
-        description = "Runs the tests with the version $apiVersion"
-        filter {
-            includeTestsMatching(packagePrefix + "account" + suffixPattern + apiVersion)
-            includeTestsMatching(packagePrefix + "payment.domestic.payments" + suffixPattern + apiVersion)
-            includeTestsMatching(packagePrefix + "payment.domestic.scheduled.payments" + suffixPattern + apiVersion)
-            includeTestsMatching(packagePrefix + "payment.domestic.standing.order" + suffixPattern + apiVersion)
-            includeTestsMatching(packagePrefix + "payment.international.payments" + suffixPattern + apiVersion)
-            includeTestsMatching(packagePrefix + "payment.international.scheduled.payments" + suffixPattern + apiVersion)
-            includeTestsMatching(packagePrefix + "payment.international.standing.orders" + suffixPattern + apiVersion)
-            includeTestsMatching(packagePrefix + "payment.file.payments" + suffixPattern + apiVersion)
-            includeTestsMatching(packagePrefix + "payment.domestic.vrp" + suffixPattern + apiVersion)
-            includeTestsMatching(packagePrefix + "funds" + suffixPattern + apiVersion)
-            includeTestsMatching(packagePrefix + "events" + suffixPattern + apiVersion)
-        }
-        failFast = false
-    }
-}
-
-tasks.register<Test>("domestic_vrps_v3_1_10") {
-    group = "payments-tests"
-    description = "Runs the domestic vrps tests with the version v3_1_10"
-    filter {
-        includeTestsMatching(packagePrefix + "payment.domestic.vrp" + suffixPattern + "v3_1_10")
-    }
-    failFast = false
-}
-
-tasks.register<Test>("events_v3_1_10") {
-    group = "events-tests"
-    description = "Runs the events notification tests with the version v3_1_10"
-    filter {
-        includeTestsMatching(packagePrefix + "events" + suffixPattern + "v3_1_10")
-    }
-    failFast = false
-}
-
-tasks.register<Test>("singleTest") {
-    description = "Runs open banking single functional tests"
-    failFast = false
 }

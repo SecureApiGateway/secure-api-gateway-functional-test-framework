@@ -33,10 +33,10 @@ val AM_COOKIE_NAME = System.getenv("amCookieName") ?: "iPlanetDirectoryPro"
 val psu: UserRegistrationRequest by lazy { registerPSU() }
 
 // certificates
-val OB_TPP_EIDAS_SIGNING_KEY_PATH = System.getenv("eidasOBSealKey") ?: "./certs/OBSeal.key"
-val OB_TPP_EIDAS_SIGNING_PEM_PATH = System.getenv("eidasOBSealPem") ?: "./certs/OBSeal.pem"
-val OB_TPP_EIDAS_TRANSPORT_KEY_PATH = System.getenv("eidasOBWacKey") ?: "./certs/OBWac.key"
-val OB_TPP_EIDAS_TRANSPORT_PEM_PATH = System.getenv("eidasOBWacPem") ?: "./certs/OBWac.pem"
+val OB_TPP_EIDAS_SIGNING_KEY_PATH = System.getenv("eidasOBSealKey") ?: "./certificates/OBSeal.key"
+val OB_TPP_EIDAS_SIGNING_PEM_PATH = System.getenv("eidasOBSealPem") ?: "./certificates/OBSeal.pem"
+val OB_TPP_EIDAS_TRANSPORT_KEY_PATH = System.getenv("eidasOBWacKey") ?: "./certificates/OBWac.key"
+val OB_TPP_EIDAS_TRANSPORT_PEM_PATH = System.getenv("eidasOBWacPem") ?: "./certificates/OBWac.pem"
 
 val ISS_CLAIM_VALUE = System.getenv("obOrganisationId") + "/" + System.getenv("obSoftwareId")
 
