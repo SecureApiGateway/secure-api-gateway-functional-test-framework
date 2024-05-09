@@ -1,6 +1,7 @@
 package com.forgerock.sapi.gateway.framework.test.factories
 
 import com.forgerock.sapi.gateway.framework.configuration.ApiClientConfig
+import com.forgerock.sapi.gateway.framework.oauth.TokenEndpointAuthMethod
 import java.util.*
 
 /**
@@ -19,7 +20,8 @@ class ApiClientConfigFactory {
                     privateTransportPemPath = "/tmp/obwac.key",
                     publicSigningKeyID = UUID.randomUUID().toString(),
                     publicSigningPemPath = "/tmp/obsign.pem",
-                    privateSigningPemPath = "/tmp/obsign.key"
+                    privateSigningPemPath = "/tmp/obsign.key",
+                    preferredTokenEndpointAuthMethod = TokenEndpointAuthMethod.private_key_jwt
                 )
                 )
             }

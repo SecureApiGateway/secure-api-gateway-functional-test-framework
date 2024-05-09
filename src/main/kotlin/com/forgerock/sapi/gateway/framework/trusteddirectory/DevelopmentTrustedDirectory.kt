@@ -5,6 +5,7 @@ import com.forgerock.sapi.gateway.framework.configuration.DevelopmentTrustedDire
 import com.forgerock.sapi.gateway.framework.configuration.SsaClaimNames
 import com.forgerock.sapi.gateway.framework.http.fuel.jsonBody
 import com.forgerock.sapi.gateway.framework.oauth.OAuth2Server
+import com.forgerock.sapi.gateway.framework.oauth.TokenEndpointAuthMethod
 import com.forgerock.sapi.gateway.framework.platform.register.SoftwareStatementRequest
 import com.forgerock.sapi.gateway.framework.trusteddirectory.certificateproviders.ApiCertificateProvider
 import com.github.kittinunf.fuel.core.Headers
@@ -23,7 +24,9 @@ class DevelopmentTrustedDirectory(
             signingKeys = certificateProvider.getSigningKeys(),
             transportKeys = certificateProvider.getTransportKeys(),
             socketFactory = certificateProvider.getSocketFactory(),
-            trustedDirectory = this
+            trustedDirectory = this,
+            // Default the preferred auth method to private_key_jwt as it is the simplest to configure in AM
+            preferredTokenEndpointAuthMethod = TokenEndpointAuthMethod.private_key_jwt
         )
 
         apiClients[apiClient.name] = apiClient

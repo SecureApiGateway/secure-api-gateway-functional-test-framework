@@ -1,6 +1,7 @@
 package com.forgerock.sapi.gateway.framework.test.factories
 
 import com.forgerock.sapi.gateway.framework.configuration.ApiClientConfig
+import com.forgerock.sapi.gateway.framework.oauth.TokenEndpointAuthMethod
 import com.forgerock.sapi.gateway.framework.trusteddirectory.CertificateProvider
 import com.forgerock.sapi.gateway.framework.trusteddirectory.certificateproviders.FileCertificateProvider
 
@@ -15,7 +16,8 @@ class CertificateProviderFactory {
                 privateTransportPemPath = "./certificates/OBWac.key",
                 publicSigningKeyID = "qfL4CT5GrVgoyXNQtUjF5TIVOXA",
                 publicSigningPemPath = "./certificates/OBSeal.pem",
-                privateSigningPemPath = "./certificates/OBSeal.key"
+                privateSigningPemPath = "./certificates/OBSeal.key",
+                TokenEndpointAuthMethod.private_key_jwt
             )
 
             return FileCertificateProvider(apiClientConfig)

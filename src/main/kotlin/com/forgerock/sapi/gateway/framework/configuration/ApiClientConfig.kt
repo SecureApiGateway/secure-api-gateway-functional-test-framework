@@ -1,5 +1,7 @@
 package com.forgerock.sapi.gateway.framework.configuration
 
+import com.forgerock.sapi.gateway.framework.oauth.TokenEndpointAuthMethod
+
 data class ApiClientConfig(
     var orgId: String,
     var softwareId: String,
@@ -10,5 +12,7 @@ data class ApiClientConfig(
 
     var publicSigningKeyID: String,
     var publicSigningPemPath: String,
-    var privateSigningPemPath: String
+    var privateSigningPemPath: String,
+
+    var preferredTokenEndpointAuthMethod: TokenEndpointAuthMethod
 )

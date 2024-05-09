@@ -6,6 +6,7 @@ import com.forgerock.sapi.gateway.common.constants.DynamicRegistrationConstants.
 import com.forgerock.sapi.gateway.common.constants.DynamicRegistrationConstants.Companion.RESPONSE_TYPES
 import com.forgerock.sapi.gateway.common.constants.DynamicRegistrationConstants.Companion.SCOPE
 import com.forgerock.sapi.gateway.common.constants.DynamicRegistrationConstants.Companion.SOFTWARE_STATEMENT_CLAIM
+import com.forgerock.sapi.gateway.common.constants.DynamicRegistrationConstants.Companion.TLS_CLIENT_AUTH_SUBJECT_DN
 import com.forgerock.sapi.gateway.common.constants.DynamicRegistrationConstants.Companion.TOKEN_ENDPOINT_AUTH_METHOD
 import com.forgerock.sapi.gateway.common.constants.DynamicRegistrationConstants.Companion.TOKEN_ENDPOINT_AUTH_SIGNING_ALG
 import com.forgerock.sapi.gateway.framework.api.ApiUnderTest
@@ -13,10 +14,10 @@ import com.forgerock.sapi.gateway.framework.fapi.FapiCompliantValues
 import com.forgerock.sapi.gateway.framework.http.fuel.getFuelManager
 import com.forgerock.sapi.gateway.framework.http.fuel.responseObject
 import com.forgerock.sapi.gateway.framework.keys.KeyPairHolder
+import com.forgerock.sapi.gateway.framework.oauth.TokenEndpointAuthMethod
 import com.forgerock.sapi.gateway.framework.trusteddirectory.TrustedDirectory
 import com.forgerock.sapi.gateway.framework.utils.KeyUtils
 import com.github.kittinunf.fuel.core.Headers
-import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.isSuccessful
 import com.nimbusds.jose.JOSEObjectType
 import com.nimbusds.jose.JWSAlgorithm
@@ -25,8 +26,8 @@ import com.nimbusds.jose.crypto.RSASSASigner
 import com.nimbusds.jose.shaded.json.JSONArray
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
-import org.springframework.http.HttpMethod
-import java.util.*
+import java.util.Date
+import java.util.UUID
 import javax.net.ssl.SSLSocketFactory
 
 class ApiClient(
@@ -35,7 +36,8 @@ class ApiClient(
     val socketFactory: SSLSocketFactory,
     val trustedDirectory: TrustedDirectory,
     val softwareId: String = UUID.randomUUID().toString(),
-    val orgId: String = UUID.randomUUID().toString()
+    val orgId: String = UUID.randomUUID().toString(),
+    val preferredTokenEndpointAuthMethod: TokenEndpointAuthMethod
 ) {
     var name: String = "${orgId}/${softwareId}"
     val fuelManager = getFuelManager(socketFactory)
@@ -136,7 +138,8 @@ class ApiClient(
         val softwareStatementClaims = softwareStatement.jwtClaimsSet
         val redirectUris = getRedirectUriFromSoftwareStatementClaims(softwareStatementClaims)
 
-        return JWTClaimsSet.Builder()
+        val tokenEndpointAuthMethod = getTokenEndpointAuthMethod(apiUnderTest)
+        val claimsBuilder = JWTClaimsSet.Builder()
             .issuer(softwareId)
             .expirationTime(KeyUtils.getExpirationDateMinsInFuture(3))
             .claim(SOFTWARE_STATEMENT_CLAIM, softwareStatementAssertion)
@@ -144,10 +147,14 @@ class ApiClient(
             .claim(ID_TOKEN_SIGNED_RESPONSE_ALG_CLAIM, idTokenResponseAlgs(apiUnderTest))
             .claim(REDIRECT_URIS, redirectUris)
             .claim(RESPONSE_TYPES, responseTypesFromApiUnderTest(apiUnderTest))
-            .claim(TOKEN_ENDPOINT_AUTH_METHOD, getTokenEndpointAuthMethodsSupported(apiUnderTest))
+            .claim(TOKEN_ENDPOINT_AUTH_METHOD, tokenEndpointAuthMethod)
             .claim(TOKEN_ENDPOINT_AUTH_SIGNING_ALG, getTokenEndpointAuthSigningAlg(apiUnderTest))
             .claim(SCOPE, getScopesSupported(apiUnderTest))
-            .build()
+
+        if (tokenEndpointAuthMethod == TokenEndpointAuthMethod.tls_client_auth) {
+            claimsBuilder.claim(TLS_CLIENT_AUTH_SUBJECT_DN, getTransportCertSubjectDN())
+        }
+        return claimsBuilder.build()
     }
 
     private fun getTokenEndpointAuthSigningAlg(apiUnderTest: ApiUnderTest): String {
@@ -158,8 +165,19 @@ class ApiClient(
         return apiUnderTest.oauth2Server.oidcWellKnown.scopesSupported.joinToString(separator = " ")
     }
 
-    private fun getTokenEndpointAuthMethodsSupported(apiUnderTest: ApiUnderTest): String {
-        return apiUnderTest.oauth2Server.oidcWellKnown.tokenEndpointAuthMethodsSupported[0].toString()
+    private fun getTokenEndpointAuthMethod(apiUnderTest: ApiUnderTest): TokenEndpointAuthMethod {
+        val supportedAuthMethods = getTokenEndpointAuthMethodsSupported(apiUnderTest)
+        if (supportedAuthMethods.contains(preferredTokenEndpointAuthMethod)) {
+            return preferredTokenEndpointAuthMethod
+        }
+        val authMethod = supportedAuthMethods[0]
+        println("PreferredTokenEndpointAuthMethod: $preferredTokenEndpointAuthMethod is not supported " +
+                "- falling back to: $authMethod" )
+        return authMethod
+    }
+
+    private fun getTokenEndpointAuthMethodsSupported(apiUnderTest: ApiUnderTest): List<TokenEndpointAuthMethod> {
+        return apiUnderTest.oauth2Server.oidcWellKnown.tokenEndpointAuthMethodsSupported
     }
 
     private fun idTokenResponseAlgs(apiUnderTest: ApiUnderTest): String {

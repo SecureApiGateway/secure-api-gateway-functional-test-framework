@@ -42,6 +42,7 @@ class ProductionTrustedDirectory(
             this,
             softwareId = apiClientConfig.softwareId,
             orgId = apiClientConfig.orgId,
+            preferredTokenEndpointAuthMethod = apiClientConfig.preferredTokenEndpointAuthMethod
         )
     }
 

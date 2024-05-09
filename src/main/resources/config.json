@@ -19,7 +19,8 @@
         "privateTransportPemPath": "./certificates/OBWac.key",
         "publicSigningKeyID": "qfL4CT5GrVgoyXNQtUjF5TIVOXA",
         "publicSigningPemPath": "./certificates/OBSeal.pem",
-        "privateSigningPemPath": "./certificates/OBSeal.key"
+        "privateSigningPemPath": "./certificates/OBSeal.key",
+        "preferredTokenEndpointAuthMethod": "tls_client_auth"
       }
     ],
     "ssa_claim_names": {
