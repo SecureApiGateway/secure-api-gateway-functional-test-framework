@@ -10,4 +10,4 @@ WORKDIR /opt/functional-tests
 
 RUN ./gradlew compileTestKotlin
 
-CMD ["./gradlew", "cleanTest", "tests_v3_1_10", "-i", "-Djunit.jupiter.extensions.autodetection.enabled=true"]
+CMD ["./gradlew", "test"]
