@@ -6,7 +6,7 @@ import com.forgerock.sapi.gateway.framework.data.AccessToken
 import com.forgerock.sapi.gateway.framework.fapi.FapiSecurityProfile
 import com.forgerock.sapi.gateway.framework.http.fuel.getLocationHeader
 import com.forgerock.sapi.gateway.framework.oauth.OAuth2Server
-import com.forgerock.sapi.gateway.ob.uk.support.resourceowner.ResourceOwner
+import com.forgerock.sapi.gateway.framework.configuration.ResourceOwner
 import org.apache.http.HttpStatus
 import java.net.URI
 import java.net.URLEncoder
