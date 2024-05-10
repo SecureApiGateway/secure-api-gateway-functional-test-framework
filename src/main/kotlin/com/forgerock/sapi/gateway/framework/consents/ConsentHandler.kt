@@ -9,7 +9,7 @@ import com.forgerock.sapi.gateway.framework.http.fuel.getLocationHeader
 import com.forgerock.sapi.gateway.framework.http.fuel.responseObject
 import com.forgerock.sapi.gateway.framework.oauth.OAuth2Server
 import com.forgerock.sapi.gateway.framework.oauth.TokenEndpointAuthMethod
-import com.forgerock.sapi.gateway.ob.uk.support.resourceowner.ResourceOwner
+import com.forgerock.sapi.gateway.framework.configuration.ResourceOwner
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.isSuccessful

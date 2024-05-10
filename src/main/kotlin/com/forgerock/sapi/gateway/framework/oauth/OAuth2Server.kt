@@ -14,8 +14,7 @@ import com.forgerock.sapi.gateway.framework.http.fuel.initFuel
 import com.forgerock.sapi.gateway.framework.http.fuel.responseObject
 import com.forgerock.sapi.gateway.framework.oidc.OBDirectoryOidcWellKnownResponse
 import com.forgerock.sapi.gateway.framework.oidc.OidcWellKnown
-import com.forgerock.sapi.gateway.ob.uk.framework.accesstoken.model.AccessTokenResponse
-import com.forgerock.sapi.gateway.ob.uk.support.resourceowner.ResourceOwner
+import com.forgerock.sapi.gateway.framework.configuration.ResourceOwner
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.Headers
 import com.github.kittinunf.fuel.core.isSuccessful
@@ -56,7 +55,7 @@ class OAuth2Server(private val oidcWellKnownUrl: String) {
         grantTypesSupported = oidcWellKnown.grantTypesSupported
     }
 
-    fun getAccessToken(apiClient: ApiClient, scopes: String): AccessTokenResponse {
+    fun getAccessToken(apiClient: ApiClient, scopes: String): AccessToken {
         if (oidcWellKnown.tokenEndpointAuthMethodsSupported.contains(TokenEndpointAuthMethod.private_key_jwt)) {
 
             val jwt: SignedJWT = apiClient.getClientAssertionJwt(
@@ -74,7 +73,7 @@ class OAuth2Server(private val oidcWellKnownUrl: String) {
 
             val (_, certResult, r) = apiClient.fuelManager.post(
                 oidcWellKnown.tokenEndpoint, parameters
-            ).responseObject<AccessTokenResponse>()
+            ).responseObject<AccessToken>()
 
 
             if (!certResult.isSuccessful) throw AssertionError(

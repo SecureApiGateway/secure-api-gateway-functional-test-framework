@@ -7,7 +7,7 @@ import com.forgerock.sapi.gateway.framework.oidc.OidcWellKnown
 import com.forgerock.sapi.gateway.framework.trusteddirectory.DevelopmentTrustedDirectory
 import com.forgerock.sapi.gateway.framework.trusteddirectory.SoftwareStatementProviders.OAuth2SoftwareStatementProvider
 import com.forgerock.sapi.gateway.framework.trusteddirectory.certificateproviders.ApiCertificateProvider
-import com.forgerock.sapi.gateway.ob.uk.support.resourceowner.ResourceOwner
+import com.forgerock.sapi.gateway.framework.configuration.ResourceOwner
 
 /**
  * Represents the API Under test

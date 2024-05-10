@@ -6,6 +6,7 @@ enum class FapiSecurityProfile {
     FAPI_RW, FAPI_1_0_ADVANCED, FAPI_2_0
 }
 
+const val PLAIN_FAPI_ACR_CLAIM = "urn:mace:incommon:iap:silver"
 
 class FapiCompliantValues {
 
