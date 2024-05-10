@@ -11,7 +11,7 @@ val release = "2.2.0"
 
 val junitVersion = "5.10.2"
 val fuelVersion = "2.3.1"
-val jacksonVersion = "2.16.1"
+val jacksonVersion = "2.17.1"
 val gsonVersion = "2.9.0"
 val bouncyCastleVersion = "1.70"
 val hopliteVersion = "2.7.5"
