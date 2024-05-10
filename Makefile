@@ -35,9 +35,8 @@ ifndef apiProvidingSoftwareID
 	$(warning no setlatest supplied)
 	$(eval apiProvidingSoftwareID=Y6NjA9TOn3aMm9GaPtLwkp)
 endif
-	@echo "Running tests suite '${tests}'" ; \
-	export API_UNDER_TEST_SERVER_TLD=${apiTestServer} ; \
+	@export API_UNDER_TEST_SERVER_TLD=${apiTestServer} ; \
 	export API_PROVIDER_ORG_ID=${apiProvidingOrgID} ; \
 	export API_PROVIDER_SOFTWARE_ID=${apiProvidingSoftwareID} ; \
-	sleep 5s ; \
+	echo "Running tests suite '${tests}' against '${apiTestServer}'" ; \
 	./gradlew cleanTest ${tests};
