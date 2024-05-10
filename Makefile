@@ -2,6 +2,7 @@ service := pr/uk-core-functional-tests
 repo := europe-west4-docker.pkg.dev/sbat-gcr-develop/sapig-docker-artifact
 tests := test
 
+
 docker:
 ifndef tag
 	$(warning no tag supplied; latest assumed)
@@ -22,6 +23,21 @@ endif
    	fi;
 
 test:
-	@echo "Running tests suite '${tests}'"
-	sleep 5s
-	./gradlew cleanTest ${tests}
+ifndef apiTestServer
+	$(warning no apiTestServer supplied)
+	$(eval apiTestServer=dev-core.forgerock.financial)
+endif
+ifndef apiProvidingOrgID
+	$(warning no apiProvidingOrgID supplied)
+	$(eval apiProvidingOrgID=0015800001041REAAY)
+endif
+ifndef apiProvidingSoftwareID
+	$(warning no setlatest supplied)
+	$(eval apiProvidingSoftwareID=Y6NjA9TOn3aMm9GaPtLwkp)
+endif
+	@echo "Running tests suite '${tests}'" ; \
+	export API_UNDER_TEST_SERVER_TLD=${apiTestServer} ; \
+	export API_PROVIDER_ORG_ID=${apiProvidingOrgID} ; \
+	export API_PROVIDER_SOFTWARE_ID=${apiProvidingSoftwareID} ; \
+	sleep 5s ; \
+	./gradlew cleanTest ${tests};
