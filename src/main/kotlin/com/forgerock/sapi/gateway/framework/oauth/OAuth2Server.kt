@@ -1,39 +1,26 @@
 package com.forgerock.sapi.gateway.framework.oauth
 
-import com.forgerock.sapi.gateway.common.constants.OAuth2AuthorizeRequestJwtClaims.Companion.PASSWORD
-import com.forgerock.sapi.gateway.common.constants.OAuth2AuthorizeRequestJwtClaims.Companion.REQUEST
-import com.forgerock.sapi.gateway.common.constants.OAuth2AuthorizeRequestJwtClaims.Companion.RESPONSE_TYPE
-import com.forgerock.sapi.gateway.common.constants.OAuth2AuthorizeRequestJwtClaims.Companion.USERNAME
-import com.forgerock.sapi.gateway.common.constants.OAuth2Constants.Companion.CLIENT_ID
-import com.forgerock.sapi.gateway.common.constants.OAuth2Constants.Companion.REDIRECT_URI
 import com.forgerock.sapi.gateway.common.constants.OAuth2TokenClientAssertionTypes.Companion.CLIENT_ASSERTION_TYPE_JWT_BEARER
-import com.forgerock.sapi.gateway.common.constants.OAuth2TokenGrantTypes.Companion.AUTHORIZATION_CODE
 import com.forgerock.sapi.gateway.common.constants.OAuth2TokenGrantTypes.Companion.CLIENT_CREDENTIALS
 import com.forgerock.sapi.gateway.common.constants.OAuth2TokenRequestConstants.Companion.CLIENT_ASSERTION
 import com.forgerock.sapi.gateway.common.constants.OAuth2TokenRequestConstants.Companion.CLIENT_ASSERTION_TYPE
-import com.forgerock.sapi.gateway.common.constants.OAuth2TokenRequestConstants.Companion.CODE
 import com.forgerock.sapi.gateway.common.constants.OAuth2TokenRequestConstants.Companion.GRANT_TYPE
 import com.forgerock.sapi.gateway.common.constants.OAuth2TokenRequestConstants.Companion.SCOPE
 import com.forgerock.sapi.gateway.framework.api.ApiUnderTest
 import com.forgerock.sapi.gateway.framework.apiclient.ApiClient
 import com.forgerock.sapi.gateway.framework.consents.ConsentHandlerFactory
 import com.forgerock.sapi.gateway.framework.data.AccessToken
-import com.forgerock.sapi.gateway.framework.data.AuthenticationResponse
-import com.forgerock.sapi.gateway.framework.http.fuel.getLocationHeader
+import com.forgerock.sapi.gateway.framework.http.fuel.initFuel
 import com.forgerock.sapi.gateway.framework.http.fuel.responseObject
 import com.forgerock.sapi.gateway.framework.oidc.OBDirectoryOidcWellKnownResponse
 import com.forgerock.sapi.gateway.framework.oidc.OidcWellKnown
 import com.forgerock.sapi.gateway.ob.uk.framework.accesstoken.model.AccessTokenResponse
 import com.forgerock.sapi.gateway.ob.uk.support.resourceowner.ResourceOwner
-import com.forgerock.sapi.gateway.ob.uk.tests.functional.account.access.consents.api.v3_1_8.AccountAccessConsentHandler
 import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.core.Headers
-import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.isSuccessful
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jwt.SignedJWT
-import org.apache.http.HttpStatus
 
 class OAuth2Server(private val oidcWellKnownUrl: String) {
     var oidcWellKnown: OidcWellKnown
@@ -45,6 +32,7 @@ class OAuth2Server(private val oidcWellKnownUrl: String) {
         // Hack to handle non-standard response from Open Banking Sandbox Directory. Issue raise to have them
         // fix it. https://directory.openbanking.org.uk/obieservicedesk/s/case/500Px000007m9EkIAI/the-sandbox-directory-oidc-well-known-response-does-not-conform-to-oidc-connect-well-known-10-specification
         oidcWellKnown = if (oidcWellKnownUrl.contains("openbankingtest.org.uk")) {
+            initFuel() // FIXME - hack to init fuel with client certs as .well-known endpoint requires mTLS
             val (_, response, result) = Fuel.get(oidcWellKnownUrl)
                 .header(Headers.CONTENT_TYPE, "application/jwt")
                 .responseObject<OBDirectoryOidcWellKnownResponse>()

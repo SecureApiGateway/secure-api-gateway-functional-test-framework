@@ -2,22 +2,32 @@ package com.forgerock.sapi.gateway.framework.http.fuel
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.*
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.datatype.joda.JodaModule
+import com.fasterxml.jackson.datatype.joda.deser.LocalDateDeserializer
 import com.fasterxml.jackson.datatype.joda.ser.LocalDateSerializer
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.forgerock.sapi.gateway.common.constants.OAuth2AuthorizeResponseParams
-import com.forgerock.sapi.gateway.framework.configuration.*
-import com.forgerock.sapi.gateway.framework.data.Tpp
+import com.forgerock.sapi.gateway.framework.configuration.OB_TPP_EIDAS_TRANSPORT_KEY_PATH
+import com.forgerock.sapi.gateway.framework.configuration.OB_TPP_EIDAS_TRANSPORT_PEM_PATH
+import com.forgerock.sapi.gateway.framework.configuration.TRUSTSTORE_PASSWORD
+import com.forgerock.sapi.gateway.framework.configuration.TRUSTSTORE_PATH
 import com.forgerock.sapi.gateway.framework.utils.FileUtils
-import com.forgerock.sapi.gateway.ob.uk.support.directory.createSoftwareStatement
-import com.github.kittinunf.fuel.core.*
+import com.github.kittinunf.fuel.core.FuelManager
+import com.github.kittinunf.fuel.core.Request
+import com.github.kittinunf.fuel.core.Response
+import com.github.kittinunf.fuel.core.ResponseResultOf
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.interceptors.LogRequestAsCurlInterceptor
 import com.github.kittinunf.fuel.core.interceptors.LogResponseInterceptor
+import com.github.kittinunf.fuel.core.response
 import com.github.kittinunf.fuel.jackson.jacksonDeserializerOf
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonElement
@@ -31,7 +41,6 @@ import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import org.joda.time.LocalDate
 import org.joda.time.format.ISODateTimeFormat
-import uk.org.openbanking.jackson.LocalDateDeserializer
 import java.io.InputStream
 import java.lang.reflect.Type
 import java.security.KeyStore
@@ -163,23 +172,6 @@ fun initFuel(
     val privatePemStream = FileUtils().getInputStream(privatePem)
     val publicPemStream = FileUtils().getInputStream(publicPem)
     initFuel(privatePemStream, publicPemStream)
-}
-
-/**
- * Initialise HTTP client Fuel for MTLS with a new TPP
- */
-fun initFuelAsNewTpp(): Tpp {
-    initFuel()
-    // Bootstrap truststore for any HTTP requests
-    initFuel(OB_TPP_EIDAS_TRANSPORT_KEY_PATH, OB_TPP_EIDAS_TRANSPORT_PEM_PATH)
-    val privateCert = OB_TPP_EIDAS_TRANSPORT_KEY_PATH
-    val publicCert = OB_TPP_EIDAS_TRANSPORT_PEM_PATH
-
-    val softwareStatement = createSoftwareStatement()
-
-    val signingKid = OB_TPP_OB_EIDAS_TEST_SIGNING_KID
-    val signingKey = OB_TPP_EIDAS_SIGNING_KEY_PATH
-    return Tpp(softwareStatement, privateCert, publicCert, signingKid, signingKey)
 }
 
 private fun loadKeystore(privatePem: InputStream, publicPem: InputStream): KeyStore {
