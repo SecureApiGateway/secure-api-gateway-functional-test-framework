@@ -21,7 +21,7 @@ endif
    		docker push ${repo}/securebanking/${service}:${TAG}; \
    	fi;
 
-runTests:
+test:
 	@echo "Running tests suite '${tests}'"
 	sleep 5s
 	./gradlew cleanTest ${tests}
