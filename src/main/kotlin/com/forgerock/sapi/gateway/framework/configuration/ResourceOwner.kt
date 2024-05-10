@@ -1,6 +1,4 @@
-package com.forgerock.sapi.gateway.ob.uk.support.resourceowner
-
-import com.forgerock.sapi.gateway.framework.configuration.ResourceOwnerConfig
+package com.forgerock.sapi.gateway.framework.configuration
 
 data class ResourceOwner(private val resourceOwnerConfig: ResourceOwnerConfig) {
     val userName: String = resourceOwnerConfig.username

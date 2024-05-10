@@ -13,7 +13,7 @@ import com.forgerock.sapi.gateway.framework.data.AccessToken
 import com.forgerock.sapi.gateway.framework.data.RequestParameters
 import com.forgerock.sapi.gateway.framework.utils.GsonUtils
 import com.forgerock.sapi.gateway.framework.utils.MultipleApiClientTest
-import com.forgerock.sapi.gateway.ob.uk.framework.constants.PLAIN_FAPI_ACR_CLAIM
+import com.forgerock.sapi.gateway.framework.fapi.PLAIN_FAPI_ACR_CLAIM
 import com.github.kittinunf.fuel.core.Headers
 import com.github.kittinunf.fuel.core.isSuccessful
 import com.nimbusds.jose.util.JSONObjectUtils
