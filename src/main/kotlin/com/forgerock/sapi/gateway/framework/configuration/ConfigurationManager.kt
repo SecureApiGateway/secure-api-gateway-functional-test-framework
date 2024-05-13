@@ -77,7 +77,7 @@ class ConfigurationManager(private val filePath: String = EXTERNAL_SYSTEM_DEPEND
         }
 
         fun getApiClients(): List<ApiClient> {
-            var apiClients: MutableList<ApiClient> = mutableListOf()
+            val apiClients: MutableList<ApiClient> = mutableListOf()
             apiUnderTest.devTrustedDirectory.apiClients.forEach { (_, devApiClient) ->
                 apiClients.add(devApiClient)
             }
@@ -91,8 +91,6 @@ class ConfigurationManager(private val filePath: String = EXTERNAL_SYSTEM_DEPEND
     override fun beforeAll(context: ExtensionContext?) {
         Security.addProvider(BouncyCastleProvider())
         val config = loadConfig()
-        val variables = getVariableValues(config.variables)
-        doVariableSubstitution(config, variables)
 
         println("Creating TPP using ${config.trustedDirectory.name}")
         for (apiClientConfig in config.trustedDirectory.apiClients) {
@@ -106,18 +104,5 @@ class ConfigurationManager(private val filePath: String = EXTERNAL_SYSTEM_DEPEND
             )
         }
         apiUnderTest = ApiUnderTest(config.apiUnderTest)
-    }
-
-    private fun getVariableValues(variables: List<String>): Map<String, String> {
-        val variableVals: MutableMap<String, String> = mutableMapOf()
-        for (variable in variables) {
-            val envVar = System.getenv(variable)
-            if (envVar == null) {
-                throw Exception("Variable $variable defined in config file does not have an environment variable $variable set")
-            } else {
-                variableVals[variable] = envVar
-            }
-        }
-        return variableVals
     }
 }
