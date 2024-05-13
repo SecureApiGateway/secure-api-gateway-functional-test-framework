@@ -11,9 +11,9 @@ import com.forgerock.sapi.gateway.framework.apiclient.ApiClient
 import com.forgerock.sapi.gateway.framework.configuration.ConfigurationManager.Loader.apiUnderTest
 import com.forgerock.sapi.gateway.framework.data.AccessToken
 import com.forgerock.sapi.gateway.framework.data.RequestParameters
+import com.forgerock.sapi.gateway.framework.fapi.PLAIN_FAPI_ACR_CLAIM
 import com.forgerock.sapi.gateway.framework.utils.GsonUtils
 import com.forgerock.sapi.gateway.framework.utils.MultipleApiClientTest
-import com.forgerock.sapi.gateway.framework.fapi.PLAIN_FAPI_ACR_CLAIM
 import com.github.kittinunf.fuel.core.Headers
 import com.github.kittinunf.fuel.core.isSuccessful
 import com.nimbusds.jose.util.JSONObjectUtils
@@ -85,6 +85,19 @@ class PlainFapiApiEndpointTest : MultipleApiClientTest() {
             .responseString()
 
         assertThat(response.statusCode).isEqualTo(401)
+    }
+
+    @Test
+    fun failsToAccessProtectedEndpointWhenClientCredentialsAccessTokenProvided() {
+        val apiClient = getApiClients().first()
+
+        val clientCredentialsAccessToken = apiUnderTest.oauth2Server.getClientCredentialsAccessToken(apiClient, "openid accounts")
+        val (_, response, _) = apiClient.fuelManager.get(plainFapiEndpointUrl)
+            .header("Authorization", "Bearer ${clientCredentialsAccessToken.access_token}")
+            .responseString()
+
+        assertThat(response.statusCode).isEqualTo(401)
+        assertThat(response.body().asString("application/json")).contains("invalid_grant_type")
     }
 
     @Test

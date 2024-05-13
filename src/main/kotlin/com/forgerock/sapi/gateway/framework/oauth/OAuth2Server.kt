@@ -1,5 +1,6 @@
 package com.forgerock.sapi.gateway.framework.oauth
 
+import com.forgerock.sapi.gateway.common.constants.OAuth2Constants.Companion.CLIENT_ID
 import com.forgerock.sapi.gateway.common.constants.OAuth2TokenClientAssertionTypes.Companion.CLIENT_ASSERTION_TYPE_JWT_BEARER
 import com.forgerock.sapi.gateway.common.constants.OAuth2TokenGrantTypes.Companion.CLIENT_CREDENTIALS
 import com.forgerock.sapi.gateway.common.constants.OAuth2TokenRequestConstants.Companion.CLIENT_ASSERTION
@@ -8,18 +9,18 @@ import com.forgerock.sapi.gateway.common.constants.OAuth2TokenRequestConstants.C
 import com.forgerock.sapi.gateway.common.constants.OAuth2TokenRequestConstants.Companion.SCOPE
 import com.forgerock.sapi.gateway.framework.api.ApiUnderTest
 import com.forgerock.sapi.gateway.framework.apiclient.ApiClient
+import com.forgerock.sapi.gateway.framework.configuration.ConfigurationManager.Loader.apiUnderTest
+import com.forgerock.sapi.gateway.framework.configuration.ResourceOwner
 import com.forgerock.sapi.gateway.framework.consents.ConsentHandlerFactory
 import com.forgerock.sapi.gateway.framework.data.AccessToken
 import com.forgerock.sapi.gateway.framework.http.fuel.initFuel
 import com.forgerock.sapi.gateway.framework.http.fuel.responseObject
 import com.forgerock.sapi.gateway.framework.oidc.OBDirectoryOidcWellKnownResponse
 import com.forgerock.sapi.gateway.framework.oidc.OidcWellKnown
-import com.forgerock.sapi.gateway.framework.configuration.ResourceOwner
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.Headers
 import com.github.kittinunf.fuel.core.isSuccessful
 import com.nimbusds.jose.JWSAlgorithm
-import com.nimbusds.jwt.SignedJWT
 
 class OAuth2Server(private val oidcWellKnownUrl: String) {
     var oidcWellKnown: OidcWellKnown
@@ -55,43 +56,38 @@ class OAuth2Server(private val oidcWellKnownUrl: String) {
         grantTypesSupported = oidcWellKnown.grantTypesSupported
     }
 
-    fun getAccessToken(apiClient: ApiClient, scopes: String): AccessToken {
-        if (oidcWellKnown.tokenEndpointAuthMethodsSupported.contains(TokenEndpointAuthMethod.private_key_jwt)) {
-
-            val jwt: SignedJWT = apiClient.getClientAssertionJwt(
-                aud = oidcWellKnown.tokenEndpoint,
-                jwsSigningAlgorithm = JWSAlgorithm.PS256 //ToDO: Get supported alg from oidc well known response
+    fun getClientCredentialsAccessToken(
+        apiClient: ApiClient,
+        scopes: String
+    ): AccessToken {
+        val authMethod = TokenEndpointAuthMethod.valueOf(apiClient.registrationResponse.token_endpoint_auth_method)
+        val body = mutableListOf(
+            GRANT_TYPE to CLIENT_CREDENTIALS,
+            SCOPE to scopes
+        )
+        if (authMethod == TokenEndpointAuthMethod.private_key_jwt) {
+            val clientAssertion =
+                apiClient.getClientAssertionJwt(apiUnderTest.oauth2Server.oidcWellKnown.issuer, JWSAlgorithm.PS256)
+            body.addAll(
+                listOf(
+                    CLIENT_ASSERTION_TYPE to CLIENT_ASSERTION_TYPE_JWT_BEARER,
+                    CLIENT_ASSERTION to clientAssertion.serialize()
+                )
             )
-            println("signed jwt is ${jwt.serialize()}")
-
-            val parameters = mutableListOf(
-                CLIENT_ASSERTION_TYPE to CLIENT_ASSERTION_TYPE_JWT_BEARER,
-                GRANT_TYPE to CLIENT_CREDENTIALS,
-                CLIENT_ASSERTION to jwt.serialize(),
-                SCOPE to scopes
-            )
-
-            val (_, certResult, r) = apiClient.fuelManager.post(
-                oidcWellKnown.tokenEndpoint, parameters
-            ).responseObject<AccessToken>()
-
-
-            if (!certResult.isSuccessful) throw AssertionError(
-                "Could not get requested access token data from ${oidcWellKnown.tokenEndpoint}. x-fapi-interaction-id: ${
-                    certResult.headers.get(
-                        "x-fapi-interaction-id"
-                    )
-                } ${
-                    String(
-                        certResult.data
-                    )
-                }, Response $r", r.component2()
-            )
-            return r.get()
-
-        } else {
-            throw Exception("OAuth2 server ${oidcWellKnown.issuer} does not support 'private_key_jwt' as a token_endpoint_auth_method")
+        } else if (authMethod == TokenEndpointAuthMethod.tls_client_auth) {
+            body.add(CLIENT_ID to apiClient.registrationResponse.client_id)
         }
+
+        val (_, response, result) = apiClient.fuelManager.post(
+            apiUnderTest.oauth2Server.oidcWellKnown.tokenEndpoint,
+            body
+        )
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .responseObject<AccessToken>()
+        if (!response.isSuccessful) {
+            throw AssertionError("Failed to exchange auth code for access token. $response")
+        }
+        return result.get()
     }
 
     fun getAuthorizationCodeAccessToken(
