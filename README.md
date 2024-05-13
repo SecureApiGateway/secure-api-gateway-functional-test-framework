@@ -7,7 +7,7 @@ The framework comes with a set of tests that test the SAPI-G core (Plain FAPI) d
 Default configuration that is shipped with the framework can be found here: [src/main/resources/config.json](src/main/resources/config.json)
 
 The config file supports placeholders, allowing config to be customised using environment variables.
-Placeholders are of the form: `{{ENV_VAR_NAME}}`.
+Placeholders are of the form: `${VAR}` , or to supply a default value: `${VAR:-defaultValue}`
 
 If an environment variable cannot be found, then the framework will fail to load the config file with an exception.
 
@@ -18,7 +18,13 @@ If an environment variable cannot be found, then the framework will fail to load
 | API_UNDER_TEST_SERVER_TLD | The TLD of the environment to run the tests against                                      | dev-core.forgerock.financial |
 | API_PROVIDER_ORG_ID       | The organisation id that the ApiClient belongs to as registered in the Trusted Directory | 0015800001041REAAY           |
 | API_PROVIDER_SOFTWARE_ID  | The softwate_id of the ApiClient's software statement in the Trusted Directory           | Y6NjA9TOn3aMm9GaPtLwkp       |
+| AM_REALM                  | The realm in AM being used for the OAuth2 provider for this deployment                   | alpha                        |
+| AM_COOKIE_NAME            | The name of the AM cookie that needs to be set when doing end user authentication        | iPlanetDirectoryPro          |
 
+### Config implementation details
+3rd Party library used: https://github.com/sksamuel/hoplite
+
+Variables in config can be replaced using different methods, further details: https://github.com/sksamuel/hoplite?tab=readme-ov-file#built-in-preprocessors
 
 ## Set up the certificates for test purposes
 The certificates are protected, and you can't find them in the repository, for that reason to run the functional tests in local environments is necessary set the OB certificates:

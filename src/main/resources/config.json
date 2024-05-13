@@ -1,19 +1,14 @@
 {
-  "variables": [
-    "API_UNDER_TEST_SERVER_TLD",
-    "API_PROVIDER_ORG_ID",
-    "API_PROVIDER_SOFTWARE_ID"
-  ],
   "trustedDirectory": {
     "name": "Open Banking Test Directory",
     "jwks_uri": "https://keystore.openbankingtest.org.uk/keystore/openbanking.jwks",
     "openid_well_known": "https://matls-sso.openbankingtest.org.uk/.well-known/openid-configuration",
-    "ssa_url": "https://matls-dirapi.openbankingtest.org.uk/organisation/tpp/{{API_PROVIDER_ORG_ID}}/software-statement/{{API_PROVIDER_SOFTWARE_ID}}/software-statement-assertion",
+    "ssa_url": "https://matls-dirapi.openbankingtest.org.uk/organisation/tpp/${API_PROVIDER_ORG_ID}/software-statement/${API_PROVIDER_SOFTWARE_ID}/software-statement-assertion",
     "scopesToAccessSsa": "ASPSPReadAccess TPPReadAccess AuthoritiesReadAccess",
     "api_clients": [
       {
-        "org_id": "{{API_PROVIDER_ORG_ID}}",
-        "software_id": "{{API_PROVIDER_SOFTWARE_ID}}",
+        "org_id": "${API_PROVIDER_ORG_ID}",
+        "software_id": "${API_PROVIDER_SOFTWARE_ID}",
         "publicTransportKeyID": "52TVNALuXKCYzvxgBALeDVp966I",
         "publicTransportPemPath": "./certificates/OBWac.pem",
         "privateTransportPemPath": "./certificates/OBWac.key",
@@ -28,31 +23,31 @@
     }
   },
   "apiUnderTest": {
-    "name": "{{API_UNDER_TEST_SERVER_TLD}}",
-    "serverDomain": "{{API_UNDER_TEST_SERVER_TLD}}",
+    "name": "${API_UNDER_TEST_SERVER_TLD}",
+    "serverDomain": "${API_UNDER_TEST_SERVER_TLD}",
     "fapiSecurityProfile": "FAPI_1_0_ADVANCED",
     "consentHandlerTyep": "AmSimpleConsent",
-    "cookieName": "iPlanetDirectoryPro",
-    "oidcWellKnownUrl": "https://sapig.{{API_UNDER_TEST_SERVER_TLD}}/am/oauth2/realms/root/realms/alpha/.well-known/openid-configuration",
-    "rsDiscoveryUrl": "https://mtls.sapig.{{API_UNDER_TEST_SERVER_TLD}}/rs/open-banking/discovery",
+    "cookieName": "${AM_COOKIE_NAME:-iPlanetDirectoryPro}",
+    "oidcWellKnownUrl": "https://sapig.${API_UNDER_TEST_SERVER_TLD}/am/oauth2/realms/root/realms/${AM_REALM:-alpha}/.well-known/openid-configuration",
+    "rsDiscoveryUrl": "https://mtls.sapig.${API_UNDER_TEST_SERVER_TLD}/rs/open-banking/discovery",
     "resourceOwners": [
       {
         "username": "psu4test",
         "password": "0penBanking!"
       }
     ],
-    "authenticatePath": "/am/json/realms/root/realms/alpha/authenticate",
+    "authenticatePath": "/am/json/realms/root/realms/${AM_REALM:-alpha}/authenticate",
     "devTrustedDirectory": {
       "api_clients": [],
       "name": "IG Untrusted Directory",
-      "getKeysUrl": "https://sapig.{{API_UNDER_TEST_SERVER_TLD}}/jwkms/apiclient/issuecert",
-      "getTransportPemsUrl": "https://sapig.{{API_UNDER_TEST_SERVER_TLD}}/jwkms/apiclient/gettlscert",
-      "getSigningPemsUrl": "https://sapig.{{API_UNDER_TEST_SERVER_TLD}}/jwkms/apiclient/getsigcert",
-      "getSsaUrl": "https://sapig.{{API_UNDER_TEST_SERVER_TLD}}/jwkms/apiclient/getssa",
+      "getKeysUrl": "https://sapig.${API_UNDER_TEST_SERVER_TLD}/jwkms/apiclient/issuecert",
+      "getTransportPemsUrl": "https://sapig.${API_UNDER_TEST_SERVER_TLD}/jwkms/apiclient/gettlscert",
+      "getSigningPemsUrl": "https://sapig.${API_UNDER_TEST_SERVER_TLD}/jwkms/apiclient/getsigcert",
+      "getSsaUrl": "https://sapig.${API_UNDER_TEST_SERVER_TLD}/jwkms/apiclient/getssa",
       "ssa_claim_names": {
         "redirect_uris": "software_redirect_uris"
       },
-      "oidcWellKnownUrl": "https://sapig.{{API_UNDER_TEST_SERVER_TLD}}/am/oauth2/realms/root/realms/alpha/.well-known/openid-configuration",
+      "oidcWellKnownUrl": "https://sapig.${API_UNDER_TEST_SERVER_TLD}/am/oauth2/realms/root/realms/${AM_REALM:-alpha}/.well-known/openid-configuration",
       "roles": [
         "DATA",
         "AISP",
