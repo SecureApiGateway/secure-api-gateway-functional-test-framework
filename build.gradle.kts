@@ -68,7 +68,7 @@ dependencies {
     implementation("org.apache.httpcomponents:httpclient:4.5.9")
 
     implementation("com.nimbusds:nimbus-jose-jwt:9.0.1")
-    implementation("commons-io:commons-io:2.6")
+    implementation("commons-io:commons-io:2.16.1")
 
     implementation("com.sksamuel.hoplite:hoplite-core:${hopliteVersion}")
     implementation("com.sksamuel.hoplite:hoplite-json:${hopliteVersion}")
