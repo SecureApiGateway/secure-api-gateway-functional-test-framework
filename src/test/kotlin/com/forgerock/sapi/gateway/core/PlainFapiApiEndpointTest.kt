@@ -3,7 +3,6 @@ package com.forgerock.sapi.gateway.core
 import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEqualTo
-import assertk.assertions.isNotNull
 import assertk.assertions.isTrue
 import com.forgerock.sapi.gateway.common.constants.OAuth2AuthorizeRequestJwtClaims
 import com.forgerock.sapi.gateway.common.constants.OAuth2Constants
@@ -37,15 +36,11 @@ class PlainFapiApiEndpointTest : MultipleApiClientTest() {
     @ParameterizedTest
     @MethodSource("getApiClients")
     fun successApiClientsDoPlainFapi(apiClient: ApiClient) {
-        // Given
-        val registrationResponse = apiClient.doDynamicClientRegistration(apiUnderTest)
-        assertThat(registrationResponse).isNotNull()
-
         val accessToken = getAccessToken(apiClient)
 
-        // When
         val (_, response, result) = apiClient.fuelManager.get(plainFapiEndpointUrl)
             .header(Headers.AUTHORIZATION, "Bearer ${accessToken.access_token}").responseString()
+
         assertThat(response.isSuccessful).isTrue()
         assertThat(result.get()).contains("user")
     }
@@ -103,9 +98,7 @@ class PlainFapiApiEndpointTest : MultipleApiClientTest() {
     @Test
     fun failsWhenDifferentClientTriesToUseAccessToken() {
         val client1 = getApiClients()[0]
-        client1.doDynamicClientRegistration(apiUnderTest)
         val client2 = getApiClients()[1]
-        client2.doDynamicClientRegistration(apiUnderTest)
 
         val accessTokenForClient1 = getAccessToken(client1)
 

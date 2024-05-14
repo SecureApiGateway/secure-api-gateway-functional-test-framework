@@ -9,7 +9,7 @@ class ProductionTrustedDirectoryConfigFactory {
     companion object {
         fun getValidProductionTrustedDirectoryConfig(): ProductionTrustedDirectoryConfig {
             return ProductionTrustedDirectoryConfig(
-                apiClients = ApiClientConfigFactory.getApiClientConfigs(1),
+                apiClientConfig = ApiClientConfigFactory.getApiClientConfigs(1),
                 name = "Mock production directory",
                 jwks_uri = "https://fake.com/jwks",
                 openidWellKnown = "https://forgerock.com/oidc/.well-known/openid-configuration",

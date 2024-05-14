@@ -67,7 +67,7 @@ class AMPlainFAPIConsentHandler private constructor() : ConsentHandler() {
         // See guide: https://backstage.forgerock.com/docs/am/7.5/oauth2-guide/oauth2-authz-grant.html#proc-auth-code-no-browser
         val formParams = mutableListOf(
             "decision" to "allow",
-            "redirect_uri" to apiClient.registrationResponse.redirect_uris[0],
+            "redirect_uri" to apiClient.redirectUris[0],
             "csrf" to authenticationResponse.tokenId
         )
 

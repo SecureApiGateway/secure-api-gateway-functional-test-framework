@@ -22,45 +22,40 @@ import com.github.kittinunf.fuel.core.Headers
 import com.github.kittinunf.fuel.core.isSuccessful
 import com.nimbusds.jose.JWSAlgorithm
 
-class OAuth2Server(private val oidcWellKnownUrl: String) {
-    var oidcWellKnown: OidcWellKnown
-    var grantTypesSupported: List<String>
+class OAuth2Server(oidcWellKnownUrl: String) {
+    // Hack to handle non-standard response from Open Banking Sandbox Directory. Issue raise to have them
+    // fix it. https://directory.openbanking.org.uk/obieservicedesk/s/case/500Px000007m9EkIAI/the-sandbox-directory-oidc-well-known-response-does-not-conform-to-oidc-connect-well-known-10-specification
+    var oidcWellKnown: OidcWellKnown = if (oidcWellKnownUrl.contains("openbankingtest.org.uk")) {
+        initFuel() // FIXME - hack to init fuel with client certs as .well-known endpoint requires mTLS
+        val (_, response, result) = Fuel.get(oidcWellKnownUrl)
+            .header(Headers.CONTENT_TYPE, "application/jwt")
+            .responseObject<OBDirectoryOidcWellKnownResponse>()
+
+        if (response.isSuccessful) {
+            result.get().getOidcWellKnown()
+        } else {
+            throw Exception("Failed to obtain OpenId Connect Well Known endpoint from $oidcWellKnownUrl. Error was ${response.statusCode}, $result.get()")
+        }
+    } else {
+        val (_, response, result) = Fuel.get(oidcWellKnownUrl)
+            .header(Headers.CONTENT_TYPE, "application/jwt")
+            .responseObject<OidcWellKnown>()
+
+        if (response.isSuccessful) {
+            result.get()
+        } else {
+            throw Exception("Failed to obtain OpenId Connect Well Known endpoint from $oidcWellKnownUrl. Error was ${response.statusCode}, $result.get()")
+        }
+    }
+    var grantTypesSupported: List<String> = oidcWellKnown.grantTypesSupported
 
     data class AuthorizeRequestComponents(val url: String, val parameters: List<Pair<String, String>>)
-
-    init {
-        // Hack to handle non-standard response from Open Banking Sandbox Directory. Issue raise to have them
-        // fix it. https://directory.openbanking.org.uk/obieservicedesk/s/case/500Px000007m9EkIAI/the-sandbox-directory-oidc-well-known-response-does-not-conform-to-oidc-connect-well-known-10-specification
-        oidcWellKnown = if (oidcWellKnownUrl.contains("openbankingtest.org.uk")) {
-            initFuel() // FIXME - hack to init fuel with client certs as .well-known endpoint requires mTLS
-            val (_, response, result) = Fuel.get(oidcWellKnownUrl)
-                .header(Headers.CONTENT_TYPE, "application/jwt")
-                .responseObject<OBDirectoryOidcWellKnownResponse>()
-
-            if (response.isSuccessful) {
-                result.get().getOidcWellKnown()
-            } else {
-                throw Exception("Failed to obtain OpenId Connect Well Known endpoint from $oidcWellKnownUrl. Error was ${response.statusCode}, $result.get()")
-            }
-        } else {
-            val (_, response, result) = Fuel.get(oidcWellKnownUrl)
-                .header(Headers.CONTENT_TYPE, "application/jwt")
-                .responseObject<OidcWellKnown>()
-
-            if (response.isSuccessful) {
-                result.get()
-            } else {
-                throw Exception("Failed to obtain OpenId Connect Well Known endpoint from $oidcWellKnownUrl. Error was ${response.statusCode}, $result.get()")
-            }
-        }
-        grantTypesSupported = oidcWellKnown.grantTypesSupported
-    }
 
     fun getClientCredentialsAccessToken(
         apiClient: ApiClient,
         scopes: String
     ): AccessToken {
-        val authMethod = TokenEndpointAuthMethod.valueOf(apiClient.registrationResponse.token_endpoint_auth_method)
+        val authMethod = TokenEndpointAuthMethod.valueOf(apiClient.tokenEndpointAuthMethod)
         val body = mutableListOf(
             GRANT_TYPE to CLIENT_CREDENTIALS,
             SCOPE to scopes
@@ -75,7 +70,7 @@ class OAuth2Server(private val oidcWellKnownUrl: String) {
                 )
             )
         } else if (authMethod == TokenEndpointAuthMethod.tls_client_auth) {
-            body.add(CLIENT_ID to apiClient.registrationResponse.client_id)
+            body.add(CLIENT_ID to apiClient.clientId)
         }
 
         val (_, response, result) = apiClient.fuelManager.post(

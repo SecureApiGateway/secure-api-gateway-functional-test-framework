@@ -82,12 +82,12 @@ class UkObConsentHandler: ConsentHandler() {
         val clientAssertion =
             apiClient.getClientAssertionJwt(apiUnderTest.oauth2Server.oidcWellKnown.issuer, JWSAlgorithm.PS256)
         val body = mutableListOf(
-            OAuth2Constants.CLIENT_ID to apiClient.registrationResponse.client_id,
+            OAuth2Constants.CLIENT_ID to apiClient.clientId,
             OAuth2TokenRequestConstants.GRANT_TYPE to OAuth2TokenGrantTypes.AUTHORIZATION_CODE,
             OAuth2TokenRequestConstants.CODE to authCode,
-            OAuth2Constants.REDIRECT_URI to apiClient.registrationResponse.redirect_uris[0]
+            OAuth2Constants.REDIRECT_URI to apiClient.redirectUris[0]
         )
-        if (apiClient.registrationResponse.token_endpoint_auth_method == TokenEndpointAuthMethod.private_key_jwt.toString()) {
+        if (apiClient.tokenEndpointAuthMethod == TokenEndpointAuthMethod.private_key_jwt.toString()) {
             body.addAll(
                 listOf(
                     OAuth2TokenRequestConstants.CLIENT_ASSERTION_TYPE to OAuth2TokenClientAssertionTypes.CLIENT_ASSERTION_TYPE_JWT_BEARER,
@@ -160,8 +160,8 @@ class UkObConsentHandler: ConsentHandler() {
             requestJwtClaimsBuilder.claim(domainSpecificClaim.first, domainSpecificClaim.second)
         }
         requestJwtClaimsBuilder.claim(OAuth2AuthorizeRequestJwtClaims.RESPONSE_TYPE, responseType)
-        requestJwtClaimsBuilder.claim(OAuth2Constants.REDIRECT_URI, apiClient.registrationResponse.redirect_uris[0])
-        requestJwtClaimsBuilder.claim(OAuth2Constants.CLIENT_ID, apiClient.registrationResponse.client_id)
+        requestJwtClaimsBuilder.claim(OAuth2Constants.REDIRECT_URI, apiClient.redirectUris[0])
+        requestJwtClaimsBuilder.claim(OAuth2Constants.CLIENT_ID, apiClient.clientId)
 
         val requestObjectSigningAlgo =
             apiUnderTest.oauth2Server.oidcWellKnown.requestObjectSigningAlgValuesSupported.firstOrNull()
@@ -175,7 +175,7 @@ class UkObConsentHandler: ConsentHandler() {
         val requestJwtString = requestJwt.serialize()
 
         val parameters = mutableListOf(
-            OAuth2Constants.CLIENT_ID to apiClient.registrationResponse.client_id,
+            OAuth2Constants.CLIENT_ID to apiClient.clientId,
             OAuth2AuthorizeRequestJwtClaims.REQUEST to requestJwtString,
             OAuth2AuthorizeRequestJwtClaims.USERNAME to resourceOwner.userName,
             OAuth2AuthorizeRequestJwtClaims.PASSWORD to resourceOwner.userPassword,

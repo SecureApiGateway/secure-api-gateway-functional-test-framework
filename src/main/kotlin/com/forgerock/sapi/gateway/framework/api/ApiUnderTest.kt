@@ -17,7 +17,15 @@ class ApiUnderTest(val apiConfig: ApiConfig) {
     val serverDomain: String
     val oauth2Server: OAuth2Server
     val fapiSecurityProfile: FapiSecurityProfile = FapiSecurityProfile.valueOf(apiConfig.fapiSecurityProfile)
-    val devTrustedDirectory: DevelopmentTrustedDirectory
+    val devTrustedDirectory: DevelopmentTrustedDirectory by lazy {
+        // created lazily to break the cyclic dependency (DevelopmentTrustedDirectory depends on ApiUnderTest)
+        val devDirectoryConfig = apiConfig.devTrustedDirectory
+        println("Creating DevelopmentTrustedDirectory $devDirectoryConfig.name")
+        DevelopmentTrustedDirectory(
+            devDirectoryConfig,
+            ApiCertificateProvider(devDirectoryConfig)
+        )
+    }
     val authenticatePath: String = apiConfig.authenticatePath
     val resourceOwners: MutableList<ResourceOwner> = mutableListOf()
     val cookieName = apiConfig.cookieName
@@ -36,14 +44,6 @@ class ApiUnderTest(val apiConfig: ApiConfig) {
         oauth2Server = OAuth2Server(oidcWellKnownUrl = apiConfig.oidcWellKnownUrl)
         name = apiConfig.name
         serverDomain = apiConfig.serverDomain
-        val devDirectoryConfig = apiConfig.devTrustedDirectory
-        println("Creating DevelopmentTrustedDirectory $devDirectoryConfig.name")
-        val apiCertificateProvider = ApiCertificateProvider(devDirectoryConfig)
-        val softwareStatementProvider = OAuth2SoftwareStatementProvider()
-        devTrustedDirectory = DevelopmentTrustedDirectory(
-            devDirectoryConfig,
-            apiCertificateProvider, softwareStatementProvider
-        )
 
         apiConfig.resourceOwners.forEach {
             resourceOwners.add(ResourceOwner(it))
