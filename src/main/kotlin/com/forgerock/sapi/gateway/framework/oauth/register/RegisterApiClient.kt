@@ -17,6 +17,7 @@ import com.forgerock.sapi.gateway.framework.configuration.ConfigurationManager.L
 import com.forgerock.sapi.gateway.framework.fapi.FapiCompliantValues
 import com.forgerock.sapi.gateway.framework.http.fuel.getFuelManager
 import com.forgerock.sapi.gateway.framework.http.fuel.responseObject
+import com.forgerock.sapi.gateway.framework.keys.KeyPairHolder
 import com.forgerock.sapi.gateway.framework.oauth.TokenEndpointAuthMethod
 import com.forgerock.sapi.gateway.framework.trusteddirectory.TrustedDirectory
 import com.forgerock.sapi.gateway.framework.utils.KeyUtils
@@ -36,10 +37,13 @@ import javax.net.ssl.SSLSocketFactory
 /**
  * Dynamic Client Registration implementation, takes ApiClientRegistrationConfig and completes the registration
  * process to produce ApiClient objects which can be used to access APIs.
+ * The default values for properties are aimed to create valid registration tests, these values can be changed to
+ * allow behaviour to be customised in order to trigger error responses.
  */
 class RegisterApiClient(private val trustedDirectory: TrustedDirectory) {
 
     var fuelManagerSupplier: (SSLSocketFactory) -> FuelManager = { socketFactory -> getFuelManager(socketFactory) }
+    var registrationRequestJwtSigner: (KeyPairHolder, JWSAlgorithm, JWTClaimsSet) -> SignedJWT = this::signedRegistrationRequestJwt
 
     fun register(clientConfig: ApiClientRegistrationConfig): ApiClient {
         val responseObject = invokeRegisterEndpoint(clientConfig)
@@ -67,14 +71,7 @@ class RegisterApiClient(private val trustedDirectory: TrustedDirectory) {
         val jwtClaimsSet: JWTClaimsSet =
             getRegistrationJWTClaims(softwareStatementAssertion, apiUnderTest, clientConfig)
 
-        val jwsHeader = JWSHeader.Builder(JWSAlgorithm.PS256)
-            .keyID(clientConfig.signingKeys.keyID)
-            .type(JOSEObjectType.JWT)
-            .build()
-        val signedJWT = SignedJWT(jwsHeader, jwtClaimsSet)
-        signedJWT.sign(
-            RSASSASigner(clientConfig.signingKeys.privateKey)
-        )
+        val signedJWT = registrationRequestJwtSigner.invoke(clientConfig.signingKeys, JWSAlgorithm.PS256, jwtClaimsSet)
         println("Signed registration jwt is ${signedJWT.serialize()}")
 
         val fuelManager = fuelManagerSupplier.invoke(clientConfig.socketFactory)
@@ -83,6 +80,22 @@ class RegisterApiClient(private val trustedDirectory: TrustedDirectory) {
             .header(Headers.CONTENT_TYPE, "application/jwt")
             .responseObject<RegistrationResponse>()
         return responseObject
+    }
+
+    fun signedRegistrationRequestJwt(
+        signingKeyPair: KeyPairHolder,
+        signingAlgorithm: JWSAlgorithm,
+        jwtClaimsSet: JWTClaimsSet
+    ): SignedJWT {
+        val jwsHeader = JWSHeader.Builder(signingAlgorithm)
+            .keyID(signingKeyPair.keyID)
+            .type(JOSEObjectType.JWT)
+            .build()
+        val signedJWT = SignedJWT(jwsHeader, jwtClaimsSet)
+        signedJWT.sign(
+            RSASSASigner(signingKeyPair.privateKey)
+        )
+        return signedJWT
     }
 
     private fun getRegistrationJWTClaims(softwareStatementAssertion: String, apiUnderTest: ApiUnderTest, apiClientConfig: ApiClientRegistrationConfig): JWTClaimsSet {
@@ -151,7 +164,7 @@ class RegisterApiClient(private val trustedDirectory: TrustedDirectory) {
     private fun responseTypesFromApiUnderTest(apiUnderTest: ApiUnderTest) =
         apiUnderTest.oauth2Server.oidcWellKnown.responseTypesSupported.intersect(listOf("code", "code id_token"))
 
-    fun getRedirectUriFromSoftwareStatementClaims(softwareStatementClaims: JWTClaimsSet): List<Any> {
+    private fun getRedirectUriFromSoftwareStatementClaims(softwareStatementClaims: JWTClaimsSet): List<Any> {
         val redirectUris: JSONArray =
             softwareStatementClaims.getClaim(trustedDirectory.ssaClaimNames.redirectUris) as JSONArray
         val filteredRedirectUris = redirectUris.toArray().filter {
@@ -164,7 +177,7 @@ class RegisterApiClient(private val trustedDirectory: TrustedDirectory) {
         return listOf(filteredRedirectUris[0])
     }
 
-    fun getTransportCertSubjectDN(apiClientConfig: ApiClientRegistrationConfig): String {
+    private fun getTransportCertSubjectDN(apiClientConfig: ApiClientRegistrationConfig): String {
         return apiClientConfig.transportKeys.publicCert.subjectX500Principal.name
     }
 
