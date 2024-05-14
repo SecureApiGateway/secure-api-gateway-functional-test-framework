@@ -5,7 +5,7 @@
     "openid_well_known": "https://matls-sso.openbankingtest.org.uk/.well-known/openid-configuration",
     "ssa_url": "https://matls-dirapi.openbankingtest.org.uk/organisation/tpp/${API_PROVIDER_ORG_ID}/software-statement/${API_PROVIDER_SOFTWARE_ID}/software-statement-assertion",
     "scopesToAccessSsa": "ASPSPReadAccess TPPReadAccess AuthoritiesReadAccess",
-    "api_clients": [
+    "apiClientConfig": [
       {
         "org_id": "${API_PROVIDER_ORG_ID}",
         "software_id": "${API_PROVIDER_SOFTWARE_ID}",

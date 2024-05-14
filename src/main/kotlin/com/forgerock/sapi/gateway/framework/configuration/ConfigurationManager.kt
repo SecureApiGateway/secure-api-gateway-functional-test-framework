@@ -27,7 +27,7 @@ annotation class ApisUnderTest(
     val apisUnderTest: Array<String> = []
 )
 
-class ConfigurationManager(private val filePath: String = EXTERNAL_SYSTEM_DEPENDENCIES_CONFIG_FILE_PATH) :
+class ConfigurationManager() :
     BeforeAllCallback {
 
     companion object Loader {
@@ -40,7 +40,7 @@ class ConfigurationManager(private val filePath: String = EXTERNAL_SYSTEM_DEPEND
             createConsentHandlers()
         }
 
-        val configFilePath = EXTERNAL_SYSTEM_DEPENDENCIES_CONFIG_FILE_PATH
+        private val configFilePath = EXTERNAL_SYSTEM_DEPENDENCIES_CONFIG_FILE_PATH
         lateinit var trustedDirectory: ProductionTrustedDirectory
         lateinit var apiUnderTest: ApiUnderTest
 
@@ -92,8 +92,10 @@ class ConfigurationManager(private val filePath: String = EXTERNAL_SYSTEM_DEPEND
         Security.addProvider(BouncyCastleProvider())
         val config = loadConfig()
 
+        apiUnderTest = ApiUnderTest(config.apiUnderTest)
+
         println("Creating TPP using ${config.trustedDirectory.name}")
-        for (apiClientConfig in config.trustedDirectory.apiClients) {
+        for (apiClientConfig in config.trustedDirectory.apiClientConfig) {
             val certificateProvider = FileCertificateProvider(apiClientConfig)
             val softwareStatementProvider = OAuth2SoftwareStatementProvider()
             val oauth2Server = OAuth2Server(config.trustedDirectory.openidWellKnown)
@@ -103,6 +105,6 @@ class ConfigurationManager(private val filePath: String = EXTERNAL_SYSTEM_DEPEND
                 softwareStatementProvider, certificateProvider, certificateProvider
             )
         }
-        apiUnderTest = ApiUnderTest(config.apiUnderTest)
+
     }
 }

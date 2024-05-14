@@ -1,10 +1,12 @@
 package com.forgerock.sapi.gateway.framework.trusteddirectory
 
 import com.forgerock.sapi.gateway.framework.apiclient.ApiClient
+import com.forgerock.sapi.gateway.framework.apiclient.ApiClientRegistrationConfig
 import com.forgerock.sapi.gateway.framework.configuration.ApiClientConfig
 import com.forgerock.sapi.gateway.framework.configuration.ProductionTrustedDirectoryConfig
 import com.forgerock.sapi.gateway.framework.configuration.SsaClaimNames
 import com.forgerock.sapi.gateway.framework.oauth.OAuth2Server
+import com.forgerock.sapi.gateway.framework.oauth.register.RegisterApiClient
 
 /**
  * Represents an external trusted directory, such as the UK Open Banking Directory. Such a directory acts as the
@@ -21,51 +23,52 @@ class ProductionTrustedDirectory(
 
 ) : TrustedDirectory() {
 
-    // ToDo: OAuth2Server needs to be pass in via constructor to make this class testable
-    // val oauth2Server: OAuth2Server = OAuth2Server(productionTrustedDirectoryConfig.openidWellKnown)
-
+    private val registerApiClient = RegisterApiClient(this)
+    
     init {
-        for (apiClientConfig in productionTrustedDirectoryConfig.apiClients) {
+        for (apiClientConfig in productionTrustedDirectoryConfig.apiClientConfig) {
             val apiClient = createApiClient(apiClientConfig)
             apiClients[apiClient.name] = apiClient
         }
     }
 
-    fun createApiClient(apiClientConfig: ApiClientConfig): ApiClient {
+    private fun createApiClient(apiClientConfig: ApiClientConfig): ApiClient {
+        return registerApiClient.register(
+            createApiClientRegistrationConfig(apiClientConfig)
+        )
+    }
+
+    fun createApiClientRegistrationConfig(
+        apiClientConfig: ApiClientConfig
+    ): ApiClientRegistrationConfig {
         val signingKeys = signingKeyCertProvider.getSigningKeys()
         val transportKeys = transportCertProvider.getTransportKeys()
         val socketFactory = transportCertProvider.getSocketFactory()
-        return ApiClient(
+        return ApiClientRegistrationConfig(
             signingKeys = signingKeys,
             transportKeys = transportKeys,
             socketFactory = socketFactory,
-            this,
+            trustedDirectory = this,
             softwareId = apiClientConfig.softwareId,
             orgId = apiClientConfig.orgId,
-            preferredTokenEndpointAuthMethod = apiClientConfig.preferredTokenEndpointAuthMethod
-        )
+            preferredTokenEndpointAuthMethod = apiClientConfig.preferredTokenEndpointAuthMethod)
     }
 
     override val ssaClaimNames: SsaClaimNames
         get() = productionTrustedDirectoryConfig.ssaClaimNames
 
-    override fun getSSA(apiClient: ApiClient): String {
-        val ssaUrl = this.productionTrustedDirectoryConfig.ssaUrl.replace("{org_id}", apiClient.orgId)
-            .replace("{software_id}", apiClient.softwareId)
+
+    override fun getSSA(apiClientRegistrationConfig: ApiClientRegistrationConfig): String {
+        val ssaUrl = this.productionTrustedDirectoryConfig.ssaUrl.replace("{org_id}", apiClientRegistrationConfig.orgId)
+            .replace("{software_id}", apiClientRegistrationConfig.softwareId)
         val ssa = softwareStatementProvider.getSoftwareStatementAssertion(
-            apiClient = apiClient,
+            apiClientRegistrationConfig = apiClientRegistrationConfig,
             oauth2Server = oauth2Server,
             directorySsaUrl = ssaUrl,
             scopesToAccessSsa = productionTrustedDirectoryConfig.scopesToAccessSsa
         )
 
         return ssa
-    }
-
-    private fun getSsaUrl(apiClient: ApiClient): String {
-        return productionTrustedDirectoryConfig.ssaUrl
-            .replace("{org_id}", apiClient.orgId, true)
-            .replace("{software_id}", apiClient.softwareId, true)
     }
 
 }

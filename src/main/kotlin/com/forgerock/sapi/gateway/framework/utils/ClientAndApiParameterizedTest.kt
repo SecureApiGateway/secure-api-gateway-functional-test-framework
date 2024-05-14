@@ -15,7 +15,6 @@ abstract class ClientAndApiParameterizedTest {
         fun getParameterizedTestArgs(): List<Arguments> {
             val args: MutableList<Arguments> = mutableListOf()
             parameterizedTestArguments.forEach { (apiClient, apiUnderTest) ->
-                apiClient.doDynamicClientRegistration(apiUnderTest)
                 args.add(
                     Arguments.of(
                         Named.of(apiClient.name, apiClient),
