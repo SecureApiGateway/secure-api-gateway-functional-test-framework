@@ -47,7 +47,7 @@ class RegisterApiClientTest {
         assertThat(apiClient.tokenEndpointAuthMethod).isNotNull()
 
         // Verify that we can get a client_credentials access_token for this OAuth2.0 client
-        assertThat( apiUnderTest.oauth2Server.getClientCredentialsAccessToken(apiClient, "openid accounts")).isNotNull()
+        assertThat(apiUnderTest.oauth2Server.getClientCredentialsAccessToken(apiClient, "openid accounts")).isNotNull()
     }
 
     @Nested
@@ -213,6 +213,45 @@ class RegisterApiClientTest {
             assertThat(errorResponse.error).isEqualTo("invalid_redirect_uri")
             assertThat(errorResponse.errorDescription).isEqualTo(
                 "invalid registration request redirect_uris value, must match or be a subset of the software_redirect_uris")
+        }
+
+        @Test
+        fun failsIfRedirectUriIsNotHttps() {
+            val invalidRedirectUri = "http://google.com"
+            val expectedErrorMessage = "redirect_uris must use https scheme"
+
+            testInvalidRedirectUriInSoftwareStatement(invalidRedirectUri, expectedErrorMessage)
+        }
+        @Test
+        fun failsIfRedirectUriIsLocalhost() {
+            val invalidRedirectUri = "https://localhost:8080/callback"
+            val expectedErrorMessage = "redirect_uris must not contain localhost"
+
+            testInvalidRedirectUriInSoftwareStatement(invalidRedirectUri, expectedErrorMessage)
+        }
+
+        private fun testInvalidRedirectUriInSoftwareStatement(invalidRedirectUri: String, expectedErrorMessage: String) {
+            // Use the dev directory in order to generate SSAs with invalid redirect_uris
+            val devTrustedDirectory = apiUnderTest.devTrustedDirectory
+            val devApiClientConfig = devTrustedDirectory.createApiClientRegistrationConfig()
+            val registerApiClient = RegisterApiClient(devTrustedDirectory)
+
+            // Override the SSA claim
+            registerApiClient.softwareStatementSupplier = { a ->
+                val ssaClaims = devTrustedDirectory.getSoftwareStatementClaims(a.softwareId)
+                ssaClaims.software_redirect_uris = listOf(invalidRedirectUri)
+                devTrustedDirectory.getSSA(a, ssaClaims)
+            }
+            registerApiClient.redirectUriSelector = { _ -> listOf(invalidRedirectUri) }
+
+            val (response, errorResponse) = invokeRegisterEndpointExpectingErrorResponse(
+                registerApiClient,
+                devApiClientConfig
+            )
+
+            assertThat(response.statusCode).isEqualTo(400)
+            assertThat(errorResponse.error).isEqualTo("invalid_redirect_uri")
+            assertThat(errorResponse.errorDescription).isEqualTo(expectedErrorMessage)
         }
 
         @ParameterizedTest

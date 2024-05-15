@@ -22,29 +22,38 @@ class DevelopmentTrustedDirectory(
     val oauth2Server: OAuth2Server = OAuth2Server(developerTrustedDirectoryConfig.oidcWellKnownUrl)
     init {
         val apiClient = RegisterApiClient(this).register(
-            ApiClientRegistrationConfig(
-                signingKeys = certificateProvider.getSigningKeys(),
-                transportKeys = certificateProvider.getTransportKeys(),
-                socketFactory = certificateProvider.getSocketFactory(),
-                trustedDirectory = this,
-                softwareId = UUID.randomUUID().toString(),
-                orgId = UUID.randomUUID().toString(),
-                preferredTokenEndpointAuthMethod = TokenEndpointAuthMethod.private_key_jwt
-            )
+            createApiClientRegistrationConfig()
         )
         apiClients[apiClient.name] = apiClient
     }
+
+    fun createApiClientRegistrationConfig() = ApiClientRegistrationConfig(
+        signingKeys = certificateProvider.getSigningKeys(),
+        transportKeys = certificateProvider.getTransportKeys(),
+        socketFactory = certificateProvider.getSocketFactory(),
+        trustedDirectory = this,
+        softwareId = UUID.randomUUID().toString(),
+        orgId = UUID.randomUUID().toString(),
+        preferredTokenEndpointAuthMethod = TokenEndpointAuthMethod.private_key_jwt
+    )
 
     override val ssaClaimNames: SsaClaimNames
         get() = developerTrustedDirectoryConfig.ssaClaimNames
 
 
     override fun getSSA(apiClientRegistrationConfig: ApiClientRegistrationConfig): String {
-        val ssaUrl = developerTrustedDirectoryConfig.getSsaUrl
+        val ssaClaims = getSoftwareStatementClaims(apiClientRegistrationConfig.softwareId)
+        return getSSA(apiClientRegistrationConfig, ssaClaims)
+    }
 
+    fun getSSA(
+        apiClientRegistrationConfig: ApiClientRegistrationConfig,
+        ssaClaims: SoftwareStatementRequest
+    ): String {
         val fuelManager = getFuelManager(apiClientRegistrationConfig.socketFactory)
+        val ssaUrl = developerTrustedDirectoryConfig.getSsaUrl
         val (_, response, result) = fuelManager.post(ssaUrl)
-            .jsonBody(getSoftwareStatementClaims(apiClientRegistrationConfig.softwareId))
+            .jsonBody(ssaClaims)
             .header(Headers.CONTENT_TYPE, "application/json")
             .response()
 
@@ -57,7 +66,7 @@ class DevelopmentTrustedDirectory(
         }
     }
 
-    private fun getSoftwareStatementClaims(softwareId: String): SoftwareStatementRequest {
+    fun getSoftwareStatementClaims(softwareId: String): SoftwareStatementRequest {
         val softwareStatementRequest = SoftwareStatementRequest(
             software_id = softwareId,
             software_client_name = "FAPI Functional Test Suite",

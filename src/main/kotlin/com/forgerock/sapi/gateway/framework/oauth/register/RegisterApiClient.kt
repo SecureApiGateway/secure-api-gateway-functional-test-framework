@@ -60,6 +60,17 @@ class RegisterApiClient(private val trustedDirectory: TrustedDirectory) {
      */
     var applyRequestJwtClaimOverrides: (JWTClaimsSet.Builder) -> Unit = {}
 
+    /**
+     * Supplies the software statement to use for the ApiClientRegistrationConfig
+     * Defaults to calling the trusted directory getSSA method.
+     */
+    var softwareStatementSupplier: (ApiClientRegistrationConfig) -> String = trustedDirectory::getSSA
+
+    /**
+     * Selects the redirect_uri to use for the registration from the values available in the Software Statement.
+     * Defaults to calling method: getRedirectUriFromSoftwareStatementClaims
+     */
+    var redirectUriSelector: (JWTClaimsSet) -> List<Any> = this::getRedirectUriFromSoftwareStatementClaims
 
     fun register(clientConfig: ApiClientRegistrationConfig): ApiClient {
         val responseObject = invokeRegisterEndpoint(clientConfig)
@@ -83,7 +94,7 @@ class RegisterApiClient(private val trustedDirectory: TrustedDirectory) {
     }
 
     fun invokeRegisterEndpoint(clientConfig: ApiClientRegistrationConfig): ResponseResultOf<RegistrationResponse> {
-        val softwareStatementAssertion = trustedDirectory.getSSA(clientConfig)
+        val softwareStatementAssertion = softwareStatementSupplier.invoke(clientConfig)
         val jwtClaimsSet: JWTClaimsSet =
             getRegistrationJWTClaims(softwareStatementAssertion, apiUnderTest, clientConfig)
 
@@ -117,7 +128,7 @@ class RegisterApiClient(private val trustedDirectory: TrustedDirectory) {
     private fun getRegistrationJWTClaims(softwareStatementAssertion: String, apiUnderTest: ApiUnderTest, apiClientConfig: ApiClientRegistrationConfig): JWTClaimsSet {
         val softwareStatement = SignedJWT.parse(softwareStatementAssertion)
         val softwareStatementClaims = softwareStatement.jwtClaimsSet
-        val redirectUris = getRedirectUriFromSoftwareStatementClaims(softwareStatementClaims)
+        val redirectUris = redirectUriSelector.invoke(softwareStatementClaims)
 
         val tokenEndpointAuthMethod = getTokenEndpointAuthMethod(apiUnderTest, apiClientConfig)
         val claimsBuilder = JWTClaimsSet.Builder()
