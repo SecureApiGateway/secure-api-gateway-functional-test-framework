@@ -42,8 +42,24 @@ import javax.net.ssl.SSLSocketFactory
  */
 class RegisterApiClient(private val trustedDirectory: TrustedDirectory) {
 
+    /**
+     * Function which supplies the FuelManager to use for this client.
+     * Defaults to: com.forgerock.sapi.gateway.framework.http.fuel.FuelInitialiserKt.getFuelManager
+     */
     var fuelManagerSupplier: (SSLSocketFactory) -> FuelManager = { socketFactory -> getFuelManager(socketFactory) }
+
+    /**
+     * Function which produces a SignedJWT that is used as the request param in the registration call.
+     * Defaults to calling: signedRegistrationRequestJwt method
+     */
     var registrationRequestJwtSigner: (KeyPairHolder, JWSAlgorithm, JWTClaimsSet) -> SignedJWT = this::signedRegistrationRequestJwt
+
+    /**
+     * Consumer that allows the JWTClaimsSet values to be overridden / customised.
+     * Defaults to no overrides being applied.
+     */
+    var applyRequestJwtClaimOverrides: (JWTClaimsSet.Builder) -> Unit = {}
+
 
     fun register(clientConfig: ApiClientRegistrationConfig): ApiClient {
         val responseObject = invokeRegisterEndpoint(clientConfig)
@@ -119,6 +135,8 @@ class RegisterApiClient(private val trustedDirectory: TrustedDirectory) {
         if (tokenEndpointAuthMethod == TokenEndpointAuthMethod.tls_client_auth) {
             claimsBuilder.claim(TLS_CLIENT_AUTH_SUBJECT_DN, getTransportCertSubjectDN(apiClientConfig))
         }
+        applyRequestJwtClaimOverrides.invoke(claimsBuilder)
+
         return claimsBuilder.build()
     }
 
