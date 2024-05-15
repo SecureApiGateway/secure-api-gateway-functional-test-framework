@@ -189,12 +189,11 @@ class UkObConsentHandler: ConsentHandler() {
     }
 
     private fun makeAuthRequest(apiClient: ApiClient, authRequestComponents: OAuth2Server.AuthorizeRequestComponents): Response {
-        val (_, response, result) = apiClient.fuelManager.get(
+        val (_, response, _) = apiClient.fuelManager.get(
             authRequestComponents.url,
             parameters = authRequestComponents.parameters
         ).allowRedirects(false).responseString()
 
-        var authRedirectUrl: String = ""
         if (response.statusCode != HttpStatus.SC_MOVED_TEMPORARILY) {
             throw AssertionError(
                 "Could not get authentication URL. Request to ${authRequestComponents.url} " +

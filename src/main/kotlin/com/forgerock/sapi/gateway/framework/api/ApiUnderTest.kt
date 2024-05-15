@@ -5,7 +5,6 @@ import com.forgerock.sapi.gateway.framework.fapi.FapiSecurityProfile
 import com.forgerock.sapi.gateway.framework.oauth.OAuth2Server
 import com.forgerock.sapi.gateway.framework.oidc.OidcWellKnown
 import com.forgerock.sapi.gateway.framework.trusteddirectory.DevelopmentTrustedDirectory
-import com.forgerock.sapi.gateway.framework.trusteddirectory.SoftwareStatementProviders.OAuth2SoftwareStatementProvider
 import com.forgerock.sapi.gateway.framework.trusteddirectory.certificateproviders.ApiCertificateProvider
 import com.forgerock.sapi.gateway.framework.configuration.ResourceOwner
 

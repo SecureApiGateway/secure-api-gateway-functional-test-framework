@@ -27,7 +27,7 @@ annotation class ApisUnderTest(
     val apisUnderTest: Array<String> = []
 )
 
-class ConfigurationManager() :
+class ConfigurationManager :
     BeforeAllCallback {
 
     companion object Loader {

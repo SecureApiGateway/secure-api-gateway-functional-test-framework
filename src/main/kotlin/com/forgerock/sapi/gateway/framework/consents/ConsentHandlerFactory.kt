@@ -3,7 +3,7 @@ package com.forgerock.sapi.gateway.framework.consents
 import com.forgerock.sapi.gateway.framework.api.ApiUnderTest
 import com.forgerock.sapi.gateway.framework.fapi.FapiSecurityProfile
 
-class ConsentHandlerFactory (){
+class ConsentHandlerFactory {
 
     companion object{
         private val consentHandlers: MutableMap<FapiSecurityProfile, ConsentHandler> = mutableMapOf()

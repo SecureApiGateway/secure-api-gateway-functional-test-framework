@@ -55,12 +55,11 @@ class AMPlainFAPIConsentHandler private constructor() : ConsentHandler() {
         // request we need a mixture of query and form params in order to submit the request in the same fashion as the
         // AM UI.
         val authUri = URI.create(
-            authRequestComponents.url + "?" + authRequestComponents.parameters.map { (key, value) ->
+            authRequestComponents.url + "?" + authRequestComponents.parameters.joinToString("&") { (key, value) ->
                 URLEncoder.encode(
-                    key,
-                    StandardCharsets.UTF_8
+                    key, StandardCharsets.UTF_8
                 ) + "=" + URLEncoder.encode(value, StandardCharsets.UTF_8)
-            }.joinToString("&")
+            }
         )
 
         // decision and csrf params are required in the POST body
@@ -72,7 +71,7 @@ class AMPlainFAPIConsentHandler private constructor() : ConsentHandler() {
         )
 
         // Note: Post request - this is an AM API to communicate the consent decision
-        val (_, response, result) = apiClient.fuelManager.post(authUri.toString(), formParams)
+        val (_, response, _) = apiClient.fuelManager.post(authUri.toString(), formParams)
             .header("Content-Type", "application/x-www-form-urlencoded")
             .header("Cookie", cookie)
             .allowRedirects(false)

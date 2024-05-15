@@ -15,8 +15,8 @@ import com.github.kittinunf.fuel.core.isSuccessful
 import java.util.UUID
 
 class DevelopmentTrustedDirectory(
-    val developerTrustedDirectoryConfig: DevelopmentTrustedDirectoryConfig,
-    val certificateProvider: ApiCertificateProvider,
+    private val developerTrustedDirectoryConfig: DevelopmentTrustedDirectoryConfig,
+    private val certificateProvider: ApiCertificateProvider,
 ) : TrustedDirectory() {
 
     val oauth2Server: OAuth2Server = OAuth2Server(developerTrustedDirectoryConfig.oidcWellKnownUrl)
@@ -59,7 +59,7 @@ class DevelopmentTrustedDirectory(
 
         if (response.isSuccessful) {
             val softwareStatementAssertion = result.get()
-            println("Software Statement is ${softwareStatementAssertion}")
+            println("Software Statement is $softwareStatementAssertion")
             return softwareStatementAssertion.decodeToString()
         } else {
             throw Exception("Failed to obtain SSA from development trusted directory at $ssaUrl")
