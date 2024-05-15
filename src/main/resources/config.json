@@ -9,13 +9,13 @@
       {
         "org_id": "${API_PROVIDER_ORG_ID}",
         "software_id": "${API_PROVIDER_SOFTWARE_ID}",
-        "publicTransportKeyID": "52TVNALuXKCYzvxgBALeDVp966I",
+        "publicTransportKeyID": "${API_CLIENT_TRANSPORT_KID}",
         "publicTransportPemPath": "./certificates/OBWac.pem",
         "privateTransportPemPath": "./certificates/OBWac.key",
-        "publicSigningKeyID": "qfL4CT5GrVgoyXNQtUjF5TIVOXA",
+        "publicSigningKeyID": "${API_CLIENT_SIGNING_KID}",
         "publicSigningPemPath": "./certificates/OBSeal.pem",
         "privateSigningPemPath": "./certificates/OBSeal.key",
-        "preferredTokenEndpointAuthMethod": "tls_client_auth"
+        "preferredTokenEndpointAuthMethod": "${API_CLIENT_TOKEN_ENDPOINT_AUTH_METHOD:-tls_client_auth}"
       }
     ],
     "ssa_claim_names": {
