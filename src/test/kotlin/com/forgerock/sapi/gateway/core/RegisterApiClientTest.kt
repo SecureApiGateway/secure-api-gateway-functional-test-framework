@@ -37,6 +37,9 @@ class RegisterApiClientTest {
         )
         assertThat(apiClient.clientId).isNotEmpty()
         assertThat(apiClient.tokenEndpointAuthMethod).isNotNull()
+
+        // Verify that we can get a client_credentials access_token for this OAuth2.0 client
+        assertThat( apiUnderTest.oauth2Server.getClientCredentialsAccessToken(apiClient, "openid accounts")).isNotNull()
     }
 
     @Nested
