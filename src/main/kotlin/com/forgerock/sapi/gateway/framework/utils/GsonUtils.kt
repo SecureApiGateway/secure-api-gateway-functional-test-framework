@@ -13,7 +13,7 @@ class GsonUtils {
                     json: DateTime?,
                     typeOfSrc: Type?,
                     context: JsonSerializationContext?
-                ): JsonElement? {
+                ): JsonElement {
                     return JsonPrimitive(ISODateTimeFormat.dateTime().print(json))
                 }
             })

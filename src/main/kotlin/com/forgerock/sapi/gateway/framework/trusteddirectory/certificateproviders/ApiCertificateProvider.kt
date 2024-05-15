@@ -15,7 +15,7 @@ import javax.net.ssl.SSLSocketFactory
 class ApiCertificateProvider(val devDirectoryConfig: DevelopmentTrustedDirectoryConfig) :
     CertificateProvider {
 
-    val jwkSet: Map<String, Object>
+    val jwkSet: Map<String, Any>
     private lateinit var transportKeys: KeyPairHolder
     private lateinit var signingKeys: KeyPairHolder
     private lateinit var transportPublicCertPemString: String
@@ -27,7 +27,7 @@ class ApiCertificateProvider(val devDirectoryConfig: DevelopmentTrustedDirectory
         val (_, response, result) = Fuel.post(getKeysUrl)
             .jsonBody("{\"org_id\": \"PSDGB-FFA-5f563e89742b2800145c7da1\",\"org_name\": \"Acme Fintech\"}")
             .header(Headers.CONTENT_TYPE, "application/json")
-            .responseObject<Map<String, Object>>()
+            .responseObject<Map<String, Any>>()
 
         if (response.isSuccessful) {
             jwkSet = result.get()
@@ -77,12 +77,11 @@ class ApiCertificateProvider(val devDirectoryConfig: DevelopmentTrustedDirectory
     }
 
     override fun getSocketFactory(): SSLSocketFactory {
-        var ks = KeyUtils.getKeyStore(
+        val ks = KeyUtils.getKeyStore(
             privatePem = this.transportPrivateKeyPemString.byteInputStream(),
             publicPem = this.transportPublicCertPemString.byteInputStream()
         )
-        var socketFactory = KeyUtils.getSocketFactory(ks)
-        return socketFactory
+        return KeyUtils.getSocketFactory(ks)
     }
 
     private fun getKeyPairHolder(pemKeyPair: String, certUse: String): KeyPairHolder {

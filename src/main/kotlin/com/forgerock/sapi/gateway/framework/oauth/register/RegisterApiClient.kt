@@ -12,7 +12,6 @@ import com.forgerock.sapi.gateway.common.constants.DynamicRegistrationConstants.
 import com.forgerock.sapi.gateway.framework.api.ApiUnderTest
 import com.forgerock.sapi.gateway.framework.apiclient.ApiClient
 import com.forgerock.sapi.gateway.framework.apiclient.ApiClientRegistrationConfig
-import com.forgerock.sapi.gateway.framework.apiclient.RegistrationResponse
 import com.forgerock.sapi.gateway.framework.configuration.ConfigurationManager.Loader.apiUnderTest
 import com.forgerock.sapi.gateway.framework.fapi.FapiCompliantValues
 import com.forgerock.sapi.gateway.framework.http.fuel.getFuelManager
@@ -211,3 +210,47 @@ class RegisterApiClient(private val trustedDirectory: TrustedDirectory) {
     }
 
 }
+
+data class RegistrationResponse(
+    val application_type: String,
+    val client_id: String,
+    val client_secret: String? = null,
+    val client_secret_expires_at: String? = null,
+    val default_max_age: String,
+    val grant_types: List<String>,
+    val id_token_encrypted_response_alg: String,
+    val id_token_encrypted_response_enc: String,
+    val id_token_signed_response_alg: String,
+    val jwks_uri: String? = "",
+    val redirect_uris: List<String>,
+    val registration_access_token: String,
+    val registration_client_uri: String,
+    val request_object_encryption_alg: String,
+    val request_object_encryption_enc: String?,
+    val request_object_signing_alg: String,
+    val response_types: List<String>,
+    val scope: String,
+    val scopes: List<String>,
+    val subject_type: String,
+    val token_endpoint_auth_method: String,
+    val token_endpoint_auth_signing_alg: String,
+    val userinfo_encrypted_response_alg: String,
+    val userinfo_encrypted_response_enc: String,
+    val userinfo_signed_response_alg: String,
+    val introspection_encrypted_response_alg: String,
+    val introspection_encrypted_response_enc: String,
+    val introspection_signed_response_alg: String,
+    val client_type: String,
+    val public_key_selector: String,
+    val authorization_code_lifetime: Long,
+    val user_info_response_format_selector: String,
+    val tls_client_certificate_bound_access_tokens: Boolean,
+    val backchannel_logout_session_required: Boolean,
+    val default_max_age_enabled: Boolean,
+    val token_intro_response_format_selector: String,
+    val jwt_token_lifetime: Long,
+    val id_token_encryption_enabled: Boolean,
+    val access_token_lifetime: Long,
+    val refresh_token_lifetime: Long,
+    val software_statement: String? = null
+)

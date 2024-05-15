@@ -3,6 +3,7 @@ package com.forgerock.sapi.gateway.framework.apiclient
 import com.forgerock.sapi.gateway.common.constants.DynamicRegistrationConstants.Companion.SCOPE
 import com.forgerock.sapi.gateway.framework.http.fuel.getFuelManager
 import com.forgerock.sapi.gateway.framework.keys.KeyPairHolder
+import com.forgerock.sapi.gateway.framework.oauth.register.RegistrationResponse
 import com.forgerock.sapi.gateway.framework.trusteddirectory.TrustedDirectory
 import com.forgerock.sapi.gateway.framework.utils.KeyUtils
 import com.nimbusds.jose.JOSEObjectType

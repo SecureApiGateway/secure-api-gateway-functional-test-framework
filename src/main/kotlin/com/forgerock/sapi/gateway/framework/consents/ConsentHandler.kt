@@ -81,10 +81,7 @@ abstract class ConsentHandler {
         ).header("Content-Type", "application/x-www-form-urlencoded")
             .allowRedirects(false)
 
-
-        val (_, response, result) = authRequest.responseString()
-
-        var authRedirectUrl: String = ""
+        val (_, response, _) = authRequest.responseString()
         if (response.statusCode != HttpStatus.SC_MOVED_TEMPORARILY) {
             throw AssertionError(
                 "Could not get authentication URL. Request to ${authRequestComponents.url} " +
