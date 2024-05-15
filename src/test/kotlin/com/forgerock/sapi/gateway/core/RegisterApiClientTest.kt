@@ -7,6 +7,7 @@ import assertk.assertions.isNotNull
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.forgerock.sapi.gateway.common.constants.DynamicRegistrationConstants.Companion.REDIRECT_URIS
+import com.forgerock.sapi.gateway.common.constants.DynamicRegistrationConstants.Companion.RESPONSE_TYPES
 import com.forgerock.sapi.gateway.common.constants.DynamicRegistrationConstants.Companion.SOFTWARE_STATEMENT_CLAIM
 import com.forgerock.sapi.gateway.common.constants.DynamicRegistrationConstants.Companion.TOKEN_ENDPOINT_AUTH_METHOD
 import com.forgerock.sapi.gateway.framework.apiclient.ApiClientRegistrationConfig
@@ -274,6 +275,27 @@ class RegisterApiClientTest {
             assertThat(errorResponse.error).isEqualTo("invalid_client_metadata")
             assertThat(errorResponse.errorDescription).isEqualTo(
                 "request object field: ${signingClaimName}, must be one of: [PS256]")
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = ["code id_token token", "code token", "token", "id_token"])
+        fun failsIfResponseTypeNotSupported(invalidResponseType: String) {
+            val registerApiClient = RegisterApiClient(trustedDirectory)
+            registerApiClient.applyRequestJwtClaimOverrides = {
+                    // Override response_types with a list containing a valid value and an invalid value
+                    builder -> builder.claim(RESPONSE_TYPES, listOf("code", invalidResponseType).shuffled())
+            }
+
+            val clientConfig = trustedDirectory.createApiClientRegistrationConfig(apiClientConfig)
+            val (response, errorResponse) = invokeRegisterEndpointExpectingErrorResponse(
+                registerApiClient,
+                clientConfig
+            )
+
+            assertThat(response.statusCode).isEqualTo(400)
+            assertThat(errorResponse.error).isEqualTo("invalid_client_metadata")
+            assertThat(errorResponse.errorDescription).isEqualTo(
+                "Invalid response_types value: $invalidResponseType, must be one of: \"code\" or \"code id_token\"")
         }
 
     }
