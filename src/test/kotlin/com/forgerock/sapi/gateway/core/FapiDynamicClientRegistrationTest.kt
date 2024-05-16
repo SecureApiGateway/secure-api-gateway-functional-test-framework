@@ -30,7 +30,7 @@ import java.security.KeyPairGenerator
 import java.security.NoSuchAlgorithmException
 import java.security.PrivateKey
 
-class RegisterApiClientTest {
+class FapiDynamicClientRegistrationTest {
 
     private val apiClientConfig = trustedDirectory.productionTrustedDirectoryConfig.apiClientConfig.first()
 
@@ -114,7 +114,7 @@ class RegisterApiClientTest {
         @Test
         fun failsIfRequestJwtSignedWithWrongKey() {
             val registerApiClient = RegisterApiClient(trustedDirectory)
-            // Override the JWT signer to use RS256
+            // Override the JWT signer to supply a newly generated key
             registerApiClient.registrationRequestJwtSigner = { validKeyPair, signingAlgorithm, jwtClaimsSet ->
                 val signingKeyPairWithInvalidPrivateKey =
                     KeyPairHolder(
@@ -142,7 +142,7 @@ class RegisterApiClientTest {
         @Test
         fun failsIfRequestJwtSignedWithUnknownKid() {
             val registerApiClient = RegisterApiClient(trustedDirectory)
-            // Override the JWT signer to use RS256
+            // Override the JWT signer to use a kid not in the client's JWKS
             registerApiClient.registrationRequestJwtSigner = { validKeyPair, signingAlgorithm, jwtClaimsSet ->
                 registerApiClient.signedRegistrationRequestJwt(
                     KeyPairHolder(validKeyPair.privateKey, validKeyPair.publicCert, "unknown-kid", validKeyPair.type),
