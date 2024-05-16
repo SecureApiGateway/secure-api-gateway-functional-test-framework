@@ -38,7 +38,7 @@
     ],
     "authenticatePath": "/am/json/realms/root/realms/${AM_REALM:-alpha}/authenticate",
     "devTrustedDirectory": {
-      "name": "IG Untrusted Directory",
+      "name": "IG Hosted Development Test Directory",
       "getKeysUrl": "https://sapig.${API_UNDER_TEST_SERVER_TLD}/jwkms/apiclient/issuecert",
       "getTransportPemsUrl": "https://sapig.${API_UNDER_TEST_SERVER_TLD}/jwkms/apiclient/gettlscert",
       "getSigningPemsUrl": "https://sapig.${API_UNDER_TEST_SERVER_TLD}/jwkms/apiclient/getsigcert",

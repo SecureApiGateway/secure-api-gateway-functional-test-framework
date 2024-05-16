@@ -36,7 +36,7 @@ class PlainFapiApiEndpointTest : MultipleApiClientTest() {
     @ParameterizedTest
     @MethodSource("getApiClients")
     fun successApiClientsDoPlainFapi(apiClient: ApiClient) {
-        val accessToken = getAccessToken(apiClient)
+        val accessToken = getAuthorizationCodeAccessToken(apiClient)
 
         val (_, response, result) = apiClient.fuelManager.get(plainFapiEndpointUrl)
             .header(Headers.AUTHORIZATION, "Bearer ${accessToken.access_token}").responseString()
@@ -45,7 +45,7 @@ class PlainFapiApiEndpointTest : MultipleApiClientTest() {
         assertThat(result.get()).contains("user")
     }
 
-    private fun getAccessToken(
+    private fun getAuthorizationCodeAccessToken(
         apiClient: ApiClient
     ): AccessToken {
         val scopes = "openid accounts"
@@ -100,7 +100,7 @@ class PlainFapiApiEndpointTest : MultipleApiClientTest() {
         val client1 = getApiClients()[0]
         val client2 = getApiClients()[1]
 
-        val accessTokenForClient1 = getAccessToken(client1)
+        val accessTokenForClient1 = getAuthorizationCodeAccessToken(client1)
 
         // Validate that client1 can access the resource
         val (_, response1, result1) = client1.fuelManager.get(plainFapiEndpointUrl)
