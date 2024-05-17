@@ -87,7 +87,7 @@ class UkObConsentHandler: ConsentHandler() {
             OAuth2TokenRequestConstants.CODE to authCode,
             OAuth2Constants.REDIRECT_URI to apiClient.redirectUris[0]
         )
-        if (apiClient.tokenEndpointAuthMethod == TokenEndpointAuthMethod.private_key_jwt.toString()) {
+        if (apiClient.tokenEndpointAuthMethod == TokenEndpointAuthMethod.private_key_jwt) {
             body.addAll(
                 listOf(
                     OAuth2TokenRequestConstants.CLIENT_ASSERTION_TYPE to OAuth2TokenClientAssertionTypes.CLIENT_ASSERTION_TYPE_JWT_BEARER,

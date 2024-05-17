@@ -232,7 +232,7 @@ data class RegistrationResponse(
     val scope: String,
     val scopes: List<String>,
     val subject_type: String,
-    val token_endpoint_auth_method: String,
+    val token_endpoint_auth_method: TokenEndpointAuthMethod,
     val token_endpoint_auth_signing_alg: String,
     val userinfo_encrypted_response_alg: String,
     val userinfo_encrypted_response_enc: String,

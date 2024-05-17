@@ -55,7 +55,7 @@ class OAuth2Server(oidcWellKnownUrl: String) {
         apiClient: ApiClient,
         scopes: String
     ): AccessToken {
-        val authMethod = TokenEndpointAuthMethod.valueOf(apiClient.tokenEndpointAuthMethod)
+        val authMethod = apiClient.tokenEndpointAuthMethod
         val body = mutableListOf(
             GRANT_TYPE to CLIENT_CREDENTIALS,
             SCOPE to scopes

@@ -11,17 +11,20 @@ import com.forgerock.sapi.gateway.common.constants.DynamicRegistrationConstants.
 import com.forgerock.sapi.gateway.common.constants.DynamicRegistrationConstants.Companion.SOFTWARE_STATEMENT_CLAIM
 import com.forgerock.sapi.gateway.common.constants.DynamicRegistrationConstants.Companion.TOKEN_ENDPOINT_AUTH_METHOD
 import com.forgerock.sapi.gateway.framework.apiclient.ApiClientRegistrationConfig
+import com.forgerock.sapi.gateway.framework.configuration.ApiClientConfig
 import com.forgerock.sapi.gateway.framework.configuration.ConfigurationManager.Loader.apiUnderTest
 import com.forgerock.sapi.gateway.framework.configuration.ConfigurationManager.Loader.trustedDirectory
 import com.forgerock.sapi.gateway.framework.http.fuel.getFuelManager
 import com.forgerock.sapi.gateway.framework.keys.KeyPairHolder
 import com.forgerock.sapi.gateway.framework.oauth.OAuth2ErrorResponse
+import com.forgerock.sapi.gateway.framework.oauth.TokenEndpointAuthMethod
 import com.forgerock.sapi.gateway.framework.oauth.register.RegisterApiClient
 import com.github.kittinunf.fuel.core.Response
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.crypto.RSASSASigner
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -32,20 +35,28 @@ import java.security.PrivateKey
 
 class FapiDynamicClientRegistrationTest {
 
-    private val apiClientConfig = trustedDirectory.productionTrustedDirectoryConfig.apiClientConfig.first()
+    private lateinit var apiClientConfig:ApiClientConfig
 
     private val objectMapper = ObjectMapper().registerModule(
         KotlinModule.Builder().build()
     )
 
-    // Sanity test of the config
-    @Test
-    fun apiClientRegistersSuccessfully() {
+    @BeforeEach
+    fun beforeEach() {
+        // Take a fresh copy of the config before each test
+        apiClientConfig = trustedDirectory.productionTrustedDirectoryConfig.apiClientConfig.first().copy()
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["tls_client_auth", "private_key_jwt"])
+    fun apiClientRegistersWithSupportedAuthMethod(tokenEndpointAuthMethodString: String) {
+        val tokenEndpointAuthMethod = TokenEndpointAuthMethod.valueOf(tokenEndpointAuthMethodString)
+        apiClientConfig.preferredTokenEndpointAuthMethod = tokenEndpointAuthMethod
         val apiClient = RegisterApiClient(trustedDirectory).register(
             trustedDirectory.createApiClientRegistrationConfig(apiClientConfig)
         )
         assertThat(apiClient.clientId).isNotEmpty()
-        assertThat(apiClient.tokenEndpointAuthMethod).isNotNull()
+        assertThat(apiClient.tokenEndpointAuthMethod).isEqualTo(tokenEndpointAuthMethod)
 
         // Verify that we can get a client_credentials access_token for this OAuth2.0 client
         assertThat(apiUnderTest.oauth2Server.getClientCredentialsAccessToken(apiClient, "openid accounts")).isNotNull()
