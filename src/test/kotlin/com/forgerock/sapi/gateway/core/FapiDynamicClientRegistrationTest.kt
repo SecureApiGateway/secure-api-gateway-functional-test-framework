@@ -32,6 +32,8 @@ import org.junit.jupiter.params.provider.ValueSource
 import java.security.KeyPairGenerator
 import java.security.NoSuchAlgorithmException
 import java.security.PrivateKey
+import java.util.Date
+import java.util.concurrent.TimeUnit
 
 class FapiDynamicClientRegistrationTest {
 
@@ -123,9 +125,10 @@ class FapiDynamicClientRegistrationTest {
         }
 
         @Test
-        fun failsIfRequestJwtSignedWithWrongKey() {
+        fun failsIfRequestJwtSignatureInvalid() {
             val registerApiClient = RegisterApiClient(trustedDirectory)
-            // Override the JWT signer to supply a newly generated key
+            // Override the JWT signer to supply a newly generated key, sig will therefore not validate against the
+            // key in the JWKS for the configured keyId.
             registerApiClient.registrationRequestJwtSigner = { validKeyPair, signingAlgorithm, jwtClaimsSet ->
                 val signingKeyPairWithInvalidPrivateKey =
                     KeyPairHolder(
@@ -173,6 +176,30 @@ class FapiDynamicClientRegistrationTest {
             assertThat(errorResponse.errorDescription).isEqualTo("Registration Request signature is invalid: 'jwk not found in supplied jwkSet for kid: unknown-kid'")
         }
 
+        @Test
+        fun failsIfRequestJwtSignedByKeyWithIncorrectUse() {
+            val clientConfig = trustedDirectory.createApiClientRegistrationConfig(apiClientConfig)
+            val registerApiClient = RegisterApiClient(trustedDirectory)
+            // Override the JWT signer to use the transport key, this will not have the sig use in the JWKS
+            registerApiClient.registrationRequestJwtSigner = { validKeyPair, signingAlgorithm, jwtClaimsSet ->
+                registerApiClient.signedRegistrationRequestJwt(
+                    clientConfig.transportKeys,
+                    signingAlgorithm,
+                    jwtClaimsSet
+                )
+            }
+
+            val (response, errorResponse) = invokeRegisterEndpointExpectingErrorResponse(
+                registerApiClient,
+                clientConfig
+            )
+
+            assertThat(response.statusCode).isEqualTo(400)
+            assertThat(errorResponse.error).isEqualTo("invalid_client_metadata")
+            assertThat(errorResponse.errorDescription).isEqualTo(
+                "Registration Request signature is invalid: 'jwk for kid: ${clientConfig.transportKeys.keyID} must be signing key, instead found: tls'")
+        }
+
         private fun generateRsaPrivateKey(): PrivateKey {
             try {
                 val generator = KeyPairGenerator.getInstance("RSA")
@@ -191,55 +218,89 @@ class FapiDynamicClientRegistrationTest {
 
         @Test
         fun failsIfTokenEndpointAuthMethodNotSupported() {
-            val registerApiClient = RegisterApiClient(trustedDirectory)
-            registerApiClient.applyRequestJwtClaimOverrides = {
-                    builder -> builder.claim(TOKEN_ENDPOINT_AUTH_METHOD, "client_secret_basic")
-            }
-
-            val clientConfig = trustedDirectory.createApiClientRegistrationConfig(apiClientConfig)
-            val (response, errorResponse) = invokeRegisterEndpointExpectingErrorResponse(
-                registerApiClient,
-                clientConfig
+            testRegisteringWithInvalidRequestClaims(
+                { builder -> builder.claim(TOKEN_ENDPOINT_AUTH_METHOD, "client_secret_basic") },
+                "invalid_client_metadata",
+                "token_endpoint_auth_method not supported, must be one of: [private_key_jwt, tls_client_auth]"
             )
-
-            assertThat(response.statusCode).isEqualTo(400)
-            assertThat(errorResponse.error).isEqualTo("invalid_client_metadata")
-            assertThat(errorResponse.errorDescription).isEqualTo(
-                "token_endpoint_auth_method not supported, must be one of: [private_key_jwt, tls_client_auth]")
         }
 
         @Test
         fun failsIfRedirectUriIsNotInSoftwareStatement() {
-            val registerApiClient = RegisterApiClient(trustedDirectory)
-            registerApiClient.applyRequestJwtClaimOverrides = {
-                builder -> builder.claim(REDIRECT_URIS, listOf("https://uri-not-in-ssa.com"))
-            }
-
-            val clientConfig = trustedDirectory.createApiClientRegistrationConfig(apiClientConfig)
-            val (response, errorResponse) = invokeRegisterEndpointExpectingErrorResponse(
-                registerApiClient,
-                clientConfig
+            testRegisteringWithInvalidRequestClaims(
+                { builder -> builder.claim(REDIRECT_URIS, listOf("https://uri-not-in-ssa.com")) },
+                "invalid_redirect_uri",
+                "invalid registration request redirect_uris value, must match or be a subset of the software_redirect_uris"
             )
-
-            assertThat(response.statusCode).isEqualTo(400)
-            assertThat(errorResponse.error).isEqualTo("invalid_redirect_uri")
-            assertThat(errorResponse.errorDescription).isEqualTo(
-                "invalid registration request redirect_uris value, must match or be a subset of the software_redirect_uris")
         }
 
         @Test
         fun failsIfRedirectUriIsNotHttps() {
             val invalidRedirectUri = "http://google.com"
             val expectedErrorMessage = "redirect_uris must use https scheme"
-
             testInvalidRedirectUriInSoftwareStatement(invalidRedirectUri, expectedErrorMessage)
         }
         @Test
         fun failsIfRedirectUriIsLocalhost() {
             val invalidRedirectUri = "https://localhost:8080/callback"
             val expectedErrorMessage = "redirect_uris must not contain localhost"
-
             testInvalidRedirectUriInSoftwareStatement(invalidRedirectUri, expectedErrorMessage)
+        }
+
+        @ParameterizedTest
+        @ValueSource(
+            strings = ["token_endpoint_auth_signing_alg", "id_token_signed_response_alg", "request_object_signing_alg"]
+        )
+        fun failsIfSigningClaimConfiguredWithUnsupportedSigningAlg(signingClaimName: String) {
+            testRegisteringWithInvalidRequestClaims(
+                { builder -> builder.claim(signingClaimName, "RS256") },
+                "invalid_client_metadata",
+                "request object field: ${signingClaimName}, must be one of: [PS256]"
+            )
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = ["code id_token token", "code token", "token", "id_token"])
+        fun failsIfResponseTypeNotSupported(invalidResponseType: String) {
+            // Override response_types with a list containing a valid value and an invalid value
+            testRegisteringWithInvalidRequestClaims(
+                { builder ->
+                    builder.claim(RESPONSE_TYPES, listOf("code", invalidResponseType).shuffled())
+                },
+                "invalid_client_metadata",
+                "Invalid response_types value: $invalidResponseType, must be one of: \"code\" or \"code id_token\""
+            )
+        }
+
+        @Test
+        fun failsIfRequestJwtHasExpired() {
+            // Set JWT exp to 5 mins in the past
+            testRegisteringWithInvalidRequestClaims(
+                { builder ->
+                    builder.expirationTime(Date(System.currentTimeMillis() - TimeUnit.MINUTES.toMinutes(5)))
+                },
+                "invalid_client_metadata",
+                "registration request jwt has expired"
+            )
+        }
+
+        private fun testRegisteringWithInvalidRequestClaims(
+            claimOverrider: (JWTClaimsSet.Builder) -> Unit,
+            expectedError: String,
+            expectedErrorDescription: String
+        ) {
+            val registerApiClient = RegisterApiClient(trustedDirectory)
+            registerApiClient.applyRequestJwtClaimOverrides = claimOverrider
+
+            val clientConfig = trustedDirectory.createApiClientRegistrationConfig(apiClientConfig)
+            val (response, errorResponse) = invokeRegisterEndpointExpectingErrorResponse(
+                registerApiClient,
+                clientConfig
+            )
+
+            assertThat(response.statusCode).isEqualTo(400)
+            assertThat(errorResponse.error).isEqualTo(expectedError)
+            assertThat(errorResponse.errorDescription).isEqualTo(expectedErrorDescription)
         }
 
         private fun testInvalidRedirectUriInSoftwareStatement(invalidRedirectUri: String, expectedErrorMessage: String) {
@@ -264,49 +325,6 @@ class FapiDynamicClientRegistrationTest {
             assertThat(response.statusCode).isEqualTo(400)
             assertThat(errorResponse.error).isEqualTo("invalid_redirect_uri")
             assertThat(errorResponse.errorDescription).isEqualTo(expectedErrorMessage)
-        }
-
-        @ParameterizedTest
-        @ValueSource(
-            strings = ["token_endpoint_auth_signing_alg", "id_token_signed_response_alg", "request_object_signing_alg"]
-        )
-        fun failsIfSigningClaimConfiguredWithUnsupportedSigningAlg(signingClaimName: String) {
-            val registerApiClient = RegisterApiClient(trustedDirectory)
-            registerApiClient.applyRequestJwtClaimOverrides = {
-                    builder -> builder.claim(signingClaimName, "RS256")
-            }
-
-            val clientConfig = trustedDirectory.createApiClientRegistrationConfig(apiClientConfig)
-            val (response, errorResponse) = invokeRegisterEndpointExpectingErrorResponse(
-                registerApiClient,
-                clientConfig
-            )
-
-            assertThat(response.statusCode).isEqualTo(400)
-            assertThat(errorResponse.error).isEqualTo("invalid_client_metadata")
-            assertThat(errorResponse.errorDescription).isEqualTo(
-                "request object field: ${signingClaimName}, must be one of: [PS256]")
-        }
-
-        @ParameterizedTest
-        @ValueSource(strings = ["code id_token token", "code token", "token", "id_token"])
-        fun failsIfResponseTypeNotSupported(invalidResponseType: String) {
-            val registerApiClient = RegisterApiClient(trustedDirectory)
-            registerApiClient.applyRequestJwtClaimOverrides = {
-                    // Override response_types with a list containing a valid value and an invalid value
-                    builder -> builder.claim(RESPONSE_TYPES, listOf("code", invalidResponseType).shuffled())
-            }
-
-            val clientConfig = trustedDirectory.createApiClientRegistrationConfig(apiClientConfig)
-            val (response, errorResponse) = invokeRegisterEndpointExpectingErrorResponse(
-                registerApiClient,
-                clientConfig
-            )
-
-            assertThat(response.statusCode).isEqualTo(400)
-            assertThat(errorResponse.error).isEqualTo("invalid_client_metadata")
-            assertThat(errorResponse.errorDescription).isEqualTo(
-                "Invalid response_types value: $invalidResponseType, must be one of: \"code\" or \"code id_token\"")
         }
 
     }
