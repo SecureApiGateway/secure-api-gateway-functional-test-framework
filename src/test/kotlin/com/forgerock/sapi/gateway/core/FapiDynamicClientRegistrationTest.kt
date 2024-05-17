@@ -125,9 +125,10 @@ class FapiDynamicClientRegistrationTest {
         }
 
         @Test
-        fun failsIfRequestJwtSignedWithWrongKey() {
+        fun failsIfRequestJwtSignatureInvalid() {
             val registerApiClient = RegisterApiClient(trustedDirectory)
-            // Override the JWT signer to supply a newly generated key
+            // Override the JWT signer to supply a newly generated key, sig will therefore not validate against the
+            // key in the JWKS for the configured keyId.
             registerApiClient.registrationRequestJwtSigner = { validKeyPair, signingAlgorithm, jwtClaimsSet ->
                 val signingKeyPairWithInvalidPrivateKey =
                     KeyPairHolder(
@@ -173,6 +174,30 @@ class FapiDynamicClientRegistrationTest {
             assertThat(response.statusCode).isEqualTo(400)
             assertThat(errorResponse.error).isEqualTo("invalid_client_metadata")
             assertThat(errorResponse.errorDescription).isEqualTo("Registration Request signature is invalid: 'jwk not found in supplied jwkSet for kid: unknown-kid'")
+        }
+
+        @Test
+        fun failsIfRequestJwtSignedByKeyWithIncorrectUse() {
+            val clientConfig = trustedDirectory.createApiClientRegistrationConfig(apiClientConfig)
+            val registerApiClient = RegisterApiClient(trustedDirectory)
+            // Override the JWT signer to use the transport key, this will not have the sig use in the JWKS
+            registerApiClient.registrationRequestJwtSigner = { validKeyPair, signingAlgorithm, jwtClaimsSet ->
+                registerApiClient.signedRegistrationRequestJwt(
+                    clientConfig.transportKeys,
+                    signingAlgorithm,
+                    jwtClaimsSet
+                )
+            }
+
+            val (response, errorResponse) = invokeRegisterEndpointExpectingErrorResponse(
+                registerApiClient,
+                clientConfig
+            )
+
+            assertThat(response.statusCode).isEqualTo(400)
+            assertThat(errorResponse.error).isEqualTo("invalid_client_metadata")
+            assertThat(errorResponse.errorDescription).isEqualTo(
+                "Registration Request signature is invalid: 'jwk for kid: ${clientConfig.transportKeys.keyID} must be signing key, instead found: tls'")
         }
 
         private fun generateRsaPrivateKey(): PrivateKey {
