@@ -32,7 +32,7 @@ ifndef apiProvidingOrgID
 	$(eval apiProvidingOrgID=0015800001041REAAY)
 endif
 ifndef apiProvidingSoftwareID
-	$(warning no setlatest supplied)
+	$(warning no apiProvidingSoftwareID supplied)
 	$(eval apiProvidingSoftwareID=Y6NjA9TOn3aMm9GaPtLwkp)
 endif
 	@export API_UNDER_TEST_SERVER_TLD=${apiTestServer} ; \
