@@ -65,7 +65,7 @@ dependencies {
     implementation("io.r2:simple-pem-keystore:0.3")
     implementation("org.apache.httpcomponents:httpclient:4.5.14")
 
-    implementation("com.nimbusds:nimbus-jose-jwt:9.0.1")
+    implementation("com.nimbusds:nimbus-jose-jwt:9.39.1")
     implementation("commons-io:commons-io:2.16.1")
 
     implementation("com.sksamuel.hoplite:hoplite-core:${hopliteVersion}")
