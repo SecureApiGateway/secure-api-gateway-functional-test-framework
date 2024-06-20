@@ -39,10 +39,10 @@
     "authenticatePath": "/am/json/realms/root/realms/${AM_REALM:-alpha}/authenticate",
     "devTrustedDirectory": {
       "name": "IG Hosted Development Test Directory",
-      "getKeysUrl": "https://sapig.${API_UNDER_TEST_SERVER_TLD}/jwkms/apiclient/issuecert",
-      "getTransportPemsUrl": "https://sapig.${API_UNDER_TEST_SERVER_TLD}/jwkms/apiclient/gettlscert",
-      "getSigningPemsUrl": "https://sapig.${API_UNDER_TEST_SERVER_TLD}/jwkms/apiclient/getsigcert",
-      "getSsaUrl": "https://sapig.${API_UNDER_TEST_SERVER_TLD}/jwkms/apiclient/getssa",
+      "getKeysUrl": "https://test-trusted-directory.${API_UNDER_TEST_SERVER_TLD}/jwkms/apiclient/issuecert",
+      "getTransportPemsUrl": "https://test-trusted-directory.${API_UNDER_TEST_SERVER_TLD}/jwkms/apiclient/gettlscert",
+      "getSigningPemsUrl": "https://test-trusted-directory.${API_UNDER_TEST_SERVER_TLD}/jwkms/apiclient/getsigcert",
+      "getSsaUrl": "https://test-trusted-directory.${API_UNDER_TEST_SERVER_TLD}/jwkms/apiclient/getssa",
       "ssa_claim_names": {
         "redirect_uris": "software_redirect_uris"
       },
