@@ -5,7 +5,6 @@ import com.forgerock.sapi.gateway.framework.fapi.FapiSecurityProfile
 import com.forgerock.sapi.gateway.framework.oauth.OAuth2Server
 import com.forgerock.sapi.gateway.framework.oidc.OidcWellKnown
 import com.forgerock.sapi.gateway.framework.trusteddirectory.DevelopmentTrustedDirectory
-import com.forgerock.sapi.gateway.framework.trusteddirectory.certificateproviders.ApiCertificateProvider
 import com.forgerock.sapi.gateway.framework.configuration.ResourceOwner
 
 /**
@@ -20,10 +19,7 @@ class ApiUnderTest(val apiConfig: ApiConfig) {
         // created lazily to break the cyclic dependency (DevelopmentTrustedDirectory depends on ApiUnderTest)
         val devDirectoryConfig = apiConfig.devTrustedDirectory
         println("Creating DevelopmentTrustedDirectory $devDirectoryConfig.name")
-        DevelopmentTrustedDirectory(
-            devDirectoryConfig,
-            ApiCertificateProvider(devDirectoryConfig)
-        )
+        DevelopmentTrustedDirectory(devDirectoryConfig)
     }
     val authenticatePath: String = apiConfig.authenticatePath
     val resourceOwners: MutableList<ResourceOwner> = mutableListOf()

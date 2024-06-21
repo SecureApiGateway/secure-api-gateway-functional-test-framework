@@ -13,5 +13,5 @@ data class SoftwareStatementRequest(
     val software_policy_uri: String = "https://tpp.com/policy.html",
     val software_logo_uri: String = "https://tpp.com/tpp.png",
     val software_roles: List<String> = listOf("DATA", "AISP", "PISP", "CBPII"),
-    val software_jwks: Map<String, Any>
+    val software_jwks: Map<String, Any>? = null
 )
