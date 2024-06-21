@@ -12,7 +12,10 @@ import com.github.kittinunf.fuel.core.isSuccessful
 import com.nimbusds.jose.jwk.JWKSet
 import javax.net.ssl.SSLSocketFactory
 
-class ApiCertificateProvider(val devDirectoryConfig: DevelopmentTrustedDirectoryConfig) :
+class ApiCertificateProvider(private val devDirectoryConfig: DevelopmentTrustedDirectoryConfig,
+                             orgId: String,
+                             orgName: String,
+                             softwareId: String) :
     CertificateProvider {
 
     val jwkSet: Map<String, Any>
@@ -25,7 +28,7 @@ class ApiCertificateProvider(val devDirectoryConfig: DevelopmentTrustedDirectory
     init {
         val getKeysUrl = devDirectoryConfig.getKeysUrl
         val (_, response, result) = Fuel.post(getKeysUrl)
-            .jsonBody("{\"org_id\": \"PSDGB-FFA-5f563e89742b2800145c7da1\",\"org_name\": \"Acme Fintech\"}")
+            .jsonBody(mapOf("org_id" to orgId, "org_name" to orgName, "software_id" to softwareId))
             .header(Headers.CONTENT_TYPE, "application/json")
             .responseObject<Map<String, Any>>()
 

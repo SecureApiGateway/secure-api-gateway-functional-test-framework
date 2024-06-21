@@ -16,7 +16,6 @@ import java.util.UUID
 
 class DevelopmentTrustedDirectory(
     private val developerTrustedDirectoryConfig: DevelopmentTrustedDirectoryConfig,
-    private val certificateProvider: ApiCertificateProvider,
 ) : TrustedDirectory() {
 
     val oauth2Server: OAuth2Server = OAuth2Server(developerTrustedDirectoryConfig.oidcWellKnownUrl)
@@ -27,15 +26,19 @@ class DevelopmentTrustedDirectory(
         apiClients[apiClient.name] = apiClient
     }
 
-    fun createApiClientRegistrationConfig() = ApiClientRegistrationConfig(
-        signingKeys = certificateProvider.getSigningKeys(),
-        transportKeys = certificateProvider.getTransportKeys(),
-        socketFactory = certificateProvider.getSocketFactory(),
-        trustedDirectory = this,
-        softwareId = UUID.randomUUID().toString(),
-        orgId = UUID.randomUUID().toString(),
-        preferredTokenEndpointAuthMethod = TokenEndpointAuthMethod.private_key_jwt
-    )
+    fun createApiClientRegistrationConfig(): ApiClientRegistrationConfig {
+        val orgId = UUID.randomUUID().toString()
+        val softwareId = UUID.randomUUID().toString()
+        val orgName = "SAPI-G Testing"
+        val certificateProvider = ApiCertificateProvider(developerTrustedDirectoryConfig, orgId, orgName, softwareId)
+        return ApiClientRegistrationConfig(signingKeys = certificateProvider.getSigningKeys(),
+            transportKeys = certificateProvider.getTransportKeys(),
+            socketFactory = certificateProvider.getSocketFactory(),
+            trustedDirectory = this,
+            softwareId = softwareId,
+            orgId = orgId,
+            preferredTokenEndpointAuthMethod = TokenEndpointAuthMethod.private_key_jwt)
+    }
 
     override val ssaClaimNames: SsaClaimNames
         get() = developerTrustedDirectoryConfig.ssaClaimNames
@@ -76,8 +79,7 @@ class DevelopmentTrustedDirectory(
             software_redirect_uris = listOf("https://www.google.com", "https://postman-echo.com/get"),
             software_policy_uri = "https://github.com/SecureApiGateway",
             software_logo_uri = "https://avatars.githubusercontent.com/u/74596995?s=96&v=4",
-            software_roles = getSupportedRoles(),
-            software_jwks = certificateProvider.jwkSet
+            software_roles = getSupportedRoles()
         )
         return softwareStatementRequest
     }
