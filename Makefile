@@ -38,5 +38,7 @@ endif
 	@export API_UNDER_TEST_SERVER_TLD=${apiTestServer} ; \
 	export API_PROVIDER_ORG_ID=${apiProvidingOrgID} ; \
 	export API_PROVIDER_SOFTWARE_ID=${apiProvidingSoftwareID} ; \
+	export API_CLIENT_TRANSPORT_KID="ymG3t1EuCt_u2_TORkTAhWaEh0M" ; \
+	export API_CLIENT_SIGNING_KID="jSlqTZu6fidhnb89-v-rY01TEHY" ; \
 	echo "Running tests suite '${tests}' against '${apiTestServer}'" ; \
 	./gradlew cleanTest ${tests};
