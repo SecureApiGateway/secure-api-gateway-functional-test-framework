@@ -14,7 +14,6 @@ class CertificateProviderFactory {
                 publicTransportKeyID = "52TVNALuXKCYzvxgBALeDVp966I",
                 publicTransportPemPath = "./certificates/OBWac.pem",
                 privateTransportPemPath = "./certificates/OBWac.key",
-                publicSigningKeyID = "jSlqTZu6fidhnb89-v-rY01TEHY",
                 publicSigningPemPath = "./certificates/OBSeal.pem",
                 privateSigningPemPath = "./certificates/OBSeal.key",
                 TokenEndpointAuthMethod.private_key_jwt
