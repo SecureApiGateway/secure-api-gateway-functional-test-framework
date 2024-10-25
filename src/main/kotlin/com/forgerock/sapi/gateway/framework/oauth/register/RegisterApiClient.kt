@@ -31,6 +31,7 @@ import com.nimbusds.jose.crypto.RSASSASigner
 import com.nimbusds.jose.shaded.json.JSONArray
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
+import java.util.Date
 import javax.net.ssl.SSLSocketFactory
 
 /**
@@ -132,6 +133,7 @@ class RegisterApiClient(private val trustedDirectory: TrustedDirectory) {
         val tokenEndpointAuthMethod = getTokenEndpointAuthMethod(apiUnderTest, apiClientConfig)
         val claimsBuilder = JWTClaimsSet.Builder()
             .issuer(apiClientConfig.softwareId)
+            .issueTime(Date())
             .expirationTime(KeyUtils.getExpirationDateMinsInFuture(3))
             .claim(SOFTWARE_STATEMENT_CLAIM, softwareStatementAssertion)
             .claim(GRANT_TYPES_CLAIM, listOf("authorization_code", "refresh_token", "client_credentials"))
