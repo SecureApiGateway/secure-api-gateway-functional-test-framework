@@ -277,7 +277,7 @@ class FapiDynamicClientRegistrationTest {
             // Set JWT exp to 5 mins in the past
             testRegisteringWithInvalidRequestClaims(
                 { builder ->
-                    builder.expirationTime(Date(System.currentTimeMillis() - TimeUnit.MINUTES.toMinutes(5)))
+                    builder.expirationTime(Date(System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(5)))
                 },
                 "invalid_client_metadata",
                 "registration request jwt has expired"
