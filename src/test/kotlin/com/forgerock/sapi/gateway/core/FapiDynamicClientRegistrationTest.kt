@@ -159,7 +159,7 @@ class FapiDynamicClientRegistrationTest {
             // Override the JWT signer to use a kid not in the client's JWKS
             registerApiClient.registrationRequestJwtSigner = { validKeyPair, signingAlgorithm, jwtClaimsSet ->
                 registerApiClient.signedRegistrationRequestJwt(
-                    KeyPairHolder(validKeyPair.privateKey, validKeyPair.publicCert, "unknown-kid", validKeyPair.type),
+                    KeyPairHolder(generateRsaPrivateKey(), validKeyPair.publicCert, "unknown-kid", validKeyPair.type),
                     signingAlgorithm,
                     jwtClaimsSet
                 )
@@ -197,8 +197,9 @@ class FapiDynamicClientRegistrationTest {
             assertThat(response.statusCode).isEqualTo(400)
             assertThat(errorResponse.error).isEqualTo("invalid_client_metadata")
             assertThat(errorResponse.errorDescription).isEqualTo(
-                "Registration Request signature is invalid: 'jwk for kid: ${clientConfig.transportKeys.keyID} must be signing key, instead found: tls'")
+                "Registration Request JWT is invalid: Expected JWT to have a valid signature")
         }
+
 
         private fun generateRsaPrivateKey(): PrivateKey {
             try {
@@ -280,7 +281,7 @@ class FapiDynamicClientRegistrationTest {
                     builder.expirationTime(Date(System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(5)))
                 },
                 "invalid_client_metadata",
-                "registration request jwt has expired"
+                "Registration Request JWT is invalid: Expected timestamp 'exp' to be after the given datetime"
             )
         }
 
