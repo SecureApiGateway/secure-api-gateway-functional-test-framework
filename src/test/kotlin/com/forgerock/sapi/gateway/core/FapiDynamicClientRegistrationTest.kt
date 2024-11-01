@@ -358,7 +358,7 @@ class FapiDynamicClientRegistrationTest {
             assertThat(response.statusCode).isEqualTo(400)
             assertThat(errorResponse.error).isEqualTo("invalid_software_statement")
             assertThat(errorResponse.errorDescription).isEqualTo(
-                "Failed to validate SSA against jwks_uri 'https://keystore.openbankingtest.org.uk/keystore/openbanking.jwks'")
+                "Registration Request contains an invalid software_statement, Expected JWT to have a valid signature")
         }
 
         @Test
@@ -389,7 +389,8 @@ class FapiDynamicClientRegistrationTest {
             assertThat(response.statusCode).isEqualTo(400)
             assertThat(errorResponse.error).isEqualTo("unapproved_software_statement")
             assertThat(errorResponse.errorDescription).isEqualTo(
-                "The issuer of the software statement is unrecognised")
+                "Registration Request contains an unapproved software_statement, " +
+                        "issuer 'Unknown Trusted Directory' is not supported")
         }
 
     }
