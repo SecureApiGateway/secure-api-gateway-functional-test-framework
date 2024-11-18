@@ -15,7 +15,7 @@ If an environment variable cannot be found, then the framework will fail to load
 
 | Name                      | Purpose                                                                                  | Example value                |
 |---------------------------|------------------------------------------------------------------------------------------|------------------------------|
-| API_UNDER_TEST_SERVER_TLD | The TLD of the environment to run the tests against                                      | dev-core.forgerock.financial |
+| API_UNDER_TEST_SERVER_TLD | The TLD of the environment to run the tests against                                      | dev-cdk-core.forgerock.financial |
 | API_PROVIDER_ORG_ID       | The organisation id that the ApiClient belongs to as registered in the Trusted Directory | 0015800001041REAAY           |
 | API_PROVIDER_SOFTWARE_ID  | The softwate_id of the ApiClient's software statement in the Trusted Directory           | Y6NjA9TOn3aMm9GaPtLwkp       |
 | AM_REALM                  | The realm in AM being used for the OAuth2 provider for this deployment                   | alpha                        |

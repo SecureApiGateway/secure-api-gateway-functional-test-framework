@@ -25,7 +25,7 @@ endif
 test:
 ifndef apiTestServer
 	$(warning no apiTestServer supplied)
-	$(eval apiTestServer=dev-core.forgerock.financial)
+	$(eval apiTestServer=dev-cdk-core.forgerock.financial)
 endif
 ifndef apiProvidingOrgID
 	$(warning no apiProvidingOrgID supplied)
