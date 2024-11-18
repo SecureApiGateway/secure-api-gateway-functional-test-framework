@@ -13,15 +13,15 @@ If an environment variable cannot be found, then the framework will fail to load
 
 ### Environment variables required by default config
 
-| Name                      | Purpose                                                                                  | Example value                |
-|---------------------------|------------------------------------------------------------------------------------------|------------------------------|
+| Name                      | Purpose                                                                                  | Example value                    |
+|---------------------------|------------------------------------------------------------------------------------------|----------------------------------|
 | API_UNDER_TEST_SERVER_TLD | The TLD of the environment to run the tests against                                      | dev-cdk-core.forgerock.financial |
-| API_PROVIDER_ORG_ID       | The organisation id that the ApiClient belongs to as registered in the Trusted Directory | 0015800001041REAAY           |
-| API_PROVIDER_SOFTWARE_ID  | The softwate_id of the ApiClient's software statement in the Trusted Directory           | Y6NjA9TOn3aMm9GaPtLwkp       |
-| AM_REALM                  | The realm in AM being used for the OAuth2 provider for this deployment                   | alpha                        |
-| AM_COOKIE_NAME            | The name of the AM cookie that needs to be set when doing end user authentication        | iPlanetDirectoryPro          |
-| API_CLIENT_TRANSPORT_KID  | The kid (key id) of the ApiClient's transport key registered in their JWKS               |                              |
-| API_CLIENT_SIGNING_KID    | The kid (key id) of the ApiClient's signing key registered in their JWKS                 |                              |
+| API_PROVIDER_ORG_ID       | The organisation id that the ApiClient belongs to as registered in the Trusted Directory | 0015800001041REAAY               |
+| API_PROVIDER_SOFTWARE_ID  | The softwate_id of the ApiClient's software statement in the Trusted Directory           | Y6NjA9TOn3aMm9GaPtLwkp           |
+| AM_REALM                  | The realm in AM being used for the OAuth2 provider for this deployment                   | alpha                            |
+| AM_COOKIE_NAME            | The name of the AM cookie that needs to be set when doing end user authentication        | iPlanetDirectoryPro              |
+| API_CLIENT_TRANSPORT_KID  | The kid (key id) of the ApiClient's transport key registered in their JWKS               |                                  |
+| API_CLIENT_SIGNING_KID    | The kid (key id) of the ApiClient's signing key registered in their JWKS                 |                                  |
 
 
 ### Config implementation details
