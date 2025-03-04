@@ -38,9 +38,9 @@ class UkObConsentHandler: ConsentHandler() {
 
         // Initial Auth request has no cookie, so we will be redirected to the auth system
         val firstAuthResponse = makeAuthRequest(apiClient, authRequestComponents)
-        // Turns https://sapig.dev-ob.forgerock.financial/am/UI/Login?<params>
+        // Turns https://as-sapig.dev-ob.forgerock.financial/am/UI/Login?<params>
         val resourceOwnerLoginUrl = getLoginUrlFromAuthResponse(apiUnderTest, firstAuthResponse)
-        // into https://sapig.dev-ob.forgerock.financial/am/json/realms/root/realms/alpha/authenticate?<params>
+        // into https://as-sapig.dev-ob.forgerock.financial/am/json/realms/root/realms/alpha/authenticate?<params>
 
         val (cookieValue, successUrl, _) = performReourceOwnerLogin(resourceOwnerLoginUrl, resourceOwner)
         // Cookie will be used to show resource owner is authenticated

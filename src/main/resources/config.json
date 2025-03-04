@@ -28,8 +28,8 @@
     "fapiSecurityProfile": "FAPI_1_0_ADVANCED",
     "consentHandlerTyep": "AmSimpleConsent",
     "cookieName": "${AM_COOKIE_NAME:-iPlanetDirectoryPro}",
-    "oidcWellKnownUrl": "https://sapig.${API_UNDER_TEST_SERVER_TLD}/am/oauth2/realms/root/realms/${AM_REALM:-alpha}/.well-known/openid-configuration",
-    "rsDiscoveryUrl": "https://mtls.sapig.${API_UNDER_TEST_SERVER_TLD}/rs/open-banking/discovery",
+    "oidcWellKnownUrl": "https://as-sapig.${API_UNDER_TEST_SERVER_TLD}/am/oauth2/realms/root/realms/${AM_REALM:-alpha}/.well-known/openid-configuration",
+    "rsDiscoveryUrl": "https://rs-sapig.${API_UNDER_TEST_SERVER_TLD}/rs/open-banking/discovery",
     "resourceOwners": [
       {
         "username": "psu4test",
@@ -46,7 +46,7 @@
       "ssa_claim_names": {
         "redirect_uris": "software_redirect_uris"
       },
-      "oidcWellKnownUrl": "https://sapig.${API_UNDER_TEST_SERVER_TLD}/am/oauth2/realms/root/realms/${AM_REALM:-alpha}/.well-known/openid-configuration",
+      "oidcWellKnownUrl": "https://as-sapig.${API_UNDER_TEST_SERVER_TLD}/am/oauth2/realms/root/realms/${AM_REALM:-alpha}/.well-known/openid-configuration",
       "roles": [
         "DATA",
         "AISP",
