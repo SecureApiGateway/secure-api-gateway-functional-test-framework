@@ -122,7 +122,7 @@ class FapiDynamicClientRegistrationTest {
             assertThat(response.statusCode).isEqualTo(400)
             assertThat(errorResponse.error).isEqualTo("invalid_client_metadata")
             assertThat(errorResponse.errorDescription).isEqualTo("Registration Request JWT is invalid: " +
-                    "Expected JWT to be signed using one of the supported 'alg' values: [ES256, PS256]")
+                    "Expected JWT to be signed using one of the supported 'alg' values: [PS256]")
         }
 
         @Test
