@@ -1,6 +1,6 @@
 package com.forgerock.sapi.gateway.framework.configuration
 
-val IG_SERVER = System.getenv("igServer") ?: "https://sapig.dev.forgerock.financial"
+val IG_SERVER = System.getenv("igServer") ?: "https://as-sapig.dev.forgerock.financial"
 val RCS_DECISION_API_URI = "$IG_SERVER/rcs/api/consent/decision"
 
 val TRUSTSTORE_PATH = System.getenv("truststorePath") ?: "/com/forgerock/sapi/gateway/ob/uk/truststore.jks"

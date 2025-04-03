@@ -77,14 +77,14 @@ class KeyUtils {
             return ks
         }
 
-        fun getKeystorePassword() = "sapig".toCharArray()
+        fun getKeystorePassword() = "as-sapig".toCharArray()
 
         fun getSocketFactory(ks: KeyStore): SSLSocketFactory {
             val truststore = object {}.javaClass.getResource(TRUSTSTORE_PATH)
             val sc = SSLContextBuilder()
                 .loadKeyMaterial(
                     ks,
-                    "sapig".toCharArray()
+                    "as-sapig".toCharArray()
                 )
                 // Force keystore to select hardcoded "server" alias in io.r2.simplepemkeystore.spi.SimplePemKeyStoreSpi see https://github.com/robymus/simple-pem-keystore/issues/2
                 { _, _ -> "server" }
