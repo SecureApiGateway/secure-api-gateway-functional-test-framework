@@ -31,7 +31,7 @@ class ApiUnderTest(val apiConfig: ApiConfig) {
 
     fun getEndpointUrl(endpointName: String): String{
         // TODO: Get URL from Discovery Endpoint
-        return "https://rs-sapig.${apiConfig.serverDomain}/rs/fapi/api"
+        return "https://rs-mtls.sapig.${apiConfig.serverDomain}/rs/fapi/api"
     }
 
 
