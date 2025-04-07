@@ -95,7 +95,7 @@ abstract class ConsentHandler {
         try {
             val location = authResponse.getLocationHeader()
             val parameters = location.substring(location.indexOf("?"))
-            return "https://sapig." + apiUnderTest.serverDomain + apiUnderTest.authenticatePath + parameters
+            return "https://as-sapig." + apiUnderTest.serverDomain + apiUnderTest.authenticatePath + parameters
         } catch (e: Exception) {
             throw AssertionError("Could not obtain location header from Authorization endpoint response")
         }
