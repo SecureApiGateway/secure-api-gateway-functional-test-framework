@@ -29,7 +29,7 @@
     "consentHandlerTyep": "AmSimpleConsent",
     "cookieName": "${AM_COOKIE_NAME:-iPlanetDirectoryPro}",
     "oidcWellKnownUrl": "https://as-sapig.${API_UNDER_TEST_SERVER_TLD}/am/oauth2/realms/root/realms/${AM_REALM:-alpha}/.well-known/openid-configuration",
-    "rsDiscoveryUrl": "https://rs-sapig.${API_UNDER_TEST_SERVER_TLD}/rs/open-banking/discovery",
+    "rsDiscoveryUrl": "https://rs-mtls.sapig.${API_UNDER_TEST_SERVER_TLD}/rs/open-banking/discovery",
     "resourceOwners": [
       {
         "username": "psu4test",
