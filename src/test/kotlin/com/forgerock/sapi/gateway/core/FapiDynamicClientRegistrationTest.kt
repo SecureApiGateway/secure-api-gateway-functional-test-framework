@@ -79,7 +79,7 @@ class FapiDynamicClientRegistrationTest {
             )
 
             assertThat(response.statusCode).isEqualTo(400)
-            assertThat(errorResponse.errorDescription).isEqualTo("Client mTLS certificate not provided")
+            assertThat(errorResponse.errorDescription).isEqualTo("Client TLS certificate is missing or malformed")
         }
 
         @Test
