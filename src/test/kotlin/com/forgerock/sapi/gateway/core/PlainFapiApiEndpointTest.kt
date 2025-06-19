@@ -4,6 +4,9 @@ import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEqualTo
 import assertk.assertions.isTrue
+import assertk.fail
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.forgerock.sapi.gateway.common.constants.OAuth2AuthorizeRequestJwtClaims
 import com.forgerock.sapi.gateway.common.constants.OAuth2Constants
 import com.forgerock.sapi.gateway.framework.apiclient.ApiClient
@@ -11,6 +14,7 @@ import com.forgerock.sapi.gateway.framework.configuration.ConfigurationManager.L
 import com.forgerock.sapi.gateway.framework.data.AccessToken
 import com.forgerock.sapi.gateway.framework.data.RequestParameters
 import com.forgerock.sapi.gateway.framework.fapi.PLAIN_FAPI_ACR_CLAIM
+import com.forgerock.sapi.gateway.framework.oauth.OAuth2ErrorResponse
 import com.forgerock.sapi.gateway.framework.utils.GsonUtils
 import com.forgerock.sapi.gateway.framework.utils.MultipleApiClientTest
 import com.github.kittinunf.fuel.core.Headers
@@ -28,6 +32,9 @@ import java.util.UUID
 class PlainFapiApiEndpointTest : MultipleApiClientTest() {
 
     private val plainFapiEndpointUrl = apiUnderTest.getEndpointUrl("plainFapiEndpoint")
+    private val objectMapper = ObjectMapper().registerModule(
+        KotlinModule.Builder().build()
+    )
 
     @BeforeEach
     fun beforeEach() {
@@ -92,7 +99,16 @@ class PlainFapiApiEndpointTest : MultipleApiClientTest() {
             .responseString()
 
         assertThat(response.statusCode).isEqualTo(401)
-        assertThat(response.body().asString("application/json")).contains("invalid_grant_type")
+        val responseJson = response.body().asString("application/json")
+        val errorResponse = objectMapper.readValue(responseJson, OAuth2ErrorResponse::class.java)
+        assertThat(errorResponse.error).isEqualTo("invalid_grant")
+        var errorDescription: CharSequence = ""
+        errorResponse.errorDescription?.let {
+            errorDescription = it
+        }
+        assertThat(errorDescription).contains("Token grant type must be in: ", ignoreCase = true)
+        assertThat(errorDescription).contains("authorization_code", ignoreCase = false)
+        assertThat(errorDescription).contains("refresh_token", ignoreCase = false)
     }
 
     @Test
