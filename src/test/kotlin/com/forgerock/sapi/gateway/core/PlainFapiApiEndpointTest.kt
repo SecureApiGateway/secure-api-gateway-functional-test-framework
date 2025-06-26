@@ -106,9 +106,7 @@ class PlainFapiApiEndpointTest : MultipleApiClientTest() {
         errorResponse.errorDescription?.let {
             errorDescription = it
         }
-        assertThat(errorDescription).contains("Token grant type must be in: ", ignoreCase = true)
-        assertThat(errorDescription).contains("authorization_code", ignoreCase = false)
-        assertThat(errorDescription).contains("refresh_token", ignoreCase = false)
+        assertThat(errorDescription).isEqualTo("Token grant type must be: authorization_code")
     }
 
     @Test
