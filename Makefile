@@ -37,16 +37,16 @@ ifndef apiProvidingSoftwareID
 endif
 ifndef apiTransportKID
 	$(warning no apiTransportKID supplied)
-	$(eval apiTransportKID=ymG3t1EuCt_u2_TORkTAhWaEh0M)
+	$(eval apiTransportKID=DhsvEuHiujsRLYVVTae_ZsXRq-Q)
 endif
 ifndef apiSigningKID
 	$(warning no apiSigningKID supplied)
-	$(eval apiSigningKID=jSlqTZu6fidhnb89-v-rY01TEHY)
+	$(eval apiSigningKID=0QidrUZc2Qk-PHqbYD5VEYGm_og)
 endif
 	@export API_UNDER_TEST_SERVER_TLD=${apiTestServer} ; \
 	export API_PROVIDER_ORG_ID=${apiProvidingOrgID} ; \
 	export API_PROVIDER_SOFTWARE_ID=${apiProvidingSoftwareID} ; \
 	export API_CLIENT_TRANSPORT_KID=${apiTransportKID} ; \
 	export API_CLIENT_SIGNING_KID=${apiSigningKID} ; \
-	echo "Running tests suite '${tests}' against '${apiTestServer}'" ; \
+	echo "Running tests suite '${tests}' against '${apiTestServer}' with transport: ${apiTransportKID} and signing: ${apiSigningKID} " ; \
 	./gradlew cleanTest ${tests};
