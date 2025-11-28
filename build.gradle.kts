@@ -71,7 +71,7 @@ dependencies {
     implementation("com.sksamuel.hoplite:hoplite-core:${hopliteVersion}")
     implementation("com.sksamuel.hoplite:hoplite-json:${hopliteVersion}")
 
-    implementation("org.assertj:assertj-core:3.13.2")
+    implementation("org.assertj:assertj-core:3.27.6")
     implementation("com.willowtreeapps.assertk:assertk-jvm:0.28.1")
 
     implementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
