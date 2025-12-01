@@ -5,18 +5,18 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
  */
 // project version
 // pom artifact version used when the built artifact is published
-version = "5.0.0"
+version = "5.0.6"
 
-val junitVersion = "5.10.2"
+val junitVersion = "5.14.1"
 val fuelVersion = "2.3.1"
-val jacksonVersion = "2.17.1"
+val jacksonVersion = "2.20.1"
 val gsonVersion = "2.13.2"
 val bouncyCastleVersion = "1.70"
-val hopliteVersion = "2.7.5"
+val hopliteVersion = "2.9.0"
 
 plugins {
     // Apply the Kotlin JVM plugin to add support for Kotlin on the JVM.
-    id("org.jetbrains.kotlin.jvm") version "1.9.24"
+    id("org.jetbrains.kotlin.jvm") version "2.2.21"
     id("maven-publish")
 }
 
@@ -65,8 +65,8 @@ dependencies {
     implementation("io.r2:simple-pem-keystore:0.3")
     implementation("org.apache.httpcomponents:httpclient:4.5.14")
 
-    implementation("com.nimbusds:nimbus-jose-jwt:9.0.1")
-    implementation("commons-io:commons-io:2.16.1")
+    implementation("com.nimbusds:nimbus-jose-jwt:10.6")
+    implementation("commons-io:commons-io:2.21.0")
 
     implementation("com.sksamuel.hoplite:hoplite-core:${hopliteVersion}")
     implementation("com.sksamuel.hoplite:hoplite-json:${hopliteVersion}")
@@ -74,9 +74,8 @@ dependencies {
     implementation("org.assertj:assertj-core:3.27.6")
     implementation("com.willowtreeapps.assertk:assertk-jvm:0.28.1")
 
-    implementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
-    implementation("org.junit.jupiter:junit-jupiter-params:${junitVersion}")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+    implementation("org.junit.jupiter:junit-jupiter:${junitVersion}")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.mockito:mockito-core:5.20.0")
 }
 

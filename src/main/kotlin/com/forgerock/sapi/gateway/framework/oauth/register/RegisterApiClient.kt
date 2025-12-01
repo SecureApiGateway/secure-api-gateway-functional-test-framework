@@ -28,9 +28,12 @@ import com.nimbusds.jose.JOSEObjectType
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.crypto.RSASSASigner
-import com.nimbusds.jose.shaded.json.JSONArray
+import com.nimbusds.jose.shaded.gson.JsonArray
+import com.nimbusds.jose.shaded.gson.JsonElement
+import com.nimbusds.jose.shaded.gson.JsonPrimitive
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
+import java.util.ArrayList
 import java.util.Date
 import javax.net.ssl.SSLSocketFactory
 
@@ -195,14 +198,10 @@ class RegisterApiClient(private val trustedDirectory: TrustedDirectory) {
         apiUnderTest.oauth2Server.oidcWellKnown.responseTypesSupported.intersect(listOf("code", "code id_token"))
 
     private fun getRedirectUriFromSoftwareStatementClaims(softwareStatementClaims: JWTClaimsSet): List<Any> {
-        val redirectUris: JSONArray =
-            softwareStatementClaims.getClaim(trustedDirectory.ssaClaimNames.redirectUris) as JSONArray
-        val filteredRedirectUris = redirectUris.toArray().filter {
-            if (it is String) {
-                !it.contains("localhost")
-            } else {
-                false
-            }
+        val redirectUris: ArrayList<String> =
+            softwareStatementClaims.getClaim(trustedDirectory.ssaClaimNames.redirectUris) as ArrayList<String>
+        val filteredRedirectUris = redirectUris.filter {
+            !it.contains("localhost")
         }
         return listOf(filteredRedirectUris[0])
     }
