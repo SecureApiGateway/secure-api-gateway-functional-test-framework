@@ -11,7 +11,7 @@ val junitVersion = "5.14.1"
 val fuelVersion = "2.3.1"
 val jacksonVersion = "2.20.1"
 val gsonVersion = "2.13.2"
-val bouncyCastleVersion = "1.70"
+val bouncyCastleVersion = "1.83"
 val hopliteVersion = "2.9.0"
 
 plugins {
@@ -52,8 +52,8 @@ repositories {
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
 
-    implementation("org.bouncycastle:bcprov-jdk15on:${bouncyCastleVersion}")
-    implementation("org.bouncycastle:bcpkix-jdk15on:${bouncyCastleVersion}")
+    implementation("org.bouncycastle:bcprov-jdk18on:${bouncyCastleVersion}")
+    implementation("org.bouncycastle:bcpkix-jdk18on:${bouncyCastleVersion}")
 
     implementation("com.github.kittinunf.fuel:fuel:${fuelVersion}")
     implementation("com.github.kittinunf.fuel:fuel-jackson:${fuelVersion}")
@@ -121,8 +121,6 @@ tasks.register<Jar>("generateTestJar") {
                 "Created-by" to "${project.version} (forgerock)",
                 "Built-by" to System.getProperty("user.name"),
                 "Build-Jdk" to JavaVersion.current(),
-                "Source-Compatibility" to project.properties["sourceCompatibility"],
-                "Target-Compatibility" to project.properties["targetCompatibility"]
             )
         )
     }
