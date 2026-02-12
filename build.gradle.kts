@@ -5,7 +5,7 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
  */
 // project version
 // pom artifact version used when the built artifact is published
-version = "5.1.1"
+version = "5.1.2-SNAPSHOT"
 
 val junitVersion = "5.14.1"
 val fuelVersion = "2.3.1"
