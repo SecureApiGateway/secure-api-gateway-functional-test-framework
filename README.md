@@ -1,8 +1,6 @@
 # Secure API Gateway Function Test Framework
 This framework aims to provide the tools needed to test APIs deployed using SAPI-G.
-
 The framework comes with a set of tests that test the SAPI-G core (Plain FAPI) deployment.
-
 ## Framework configuration
 Default configuration that is shipped with the framework can be found here: [src/main/resources/config.json](src/main/resources/config.json)
 
