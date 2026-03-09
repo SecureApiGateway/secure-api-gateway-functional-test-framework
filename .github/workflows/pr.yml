@@ -7,10 +7,30 @@ on:
     paths-ignore:
       - '**/README.md'
 jobs:
-  run_pr-template:
-    name: PR - Build and Deploy
-    uses: SecureApiGateway/secure-api-gateway-ci/.github/workflows/reusable-pr.yml@main
-    secrets: inherit
-    with:
-      componentName: secure-api-gateway-functional-test-framework
-      dockerTag: pr-${{ github.event.number }}
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      # Checkout CI Repo
+      - name: Checkout CI Repo
+        uses: actions/checkout@v4
+        with:
+          path: secure-api-gateway-ci
+          repository: SecureApiGateway/secure-api-gateway-ci
+      # Auth GCP
+      - name: Call Authentication
+        uses: ./secure-api-gateway-ci/.github/actions/authentication
+        with:
+          gcpKey: ${{ secrets.GCP_SECRET_READ }}
+          garLocation: ${{ vars.GAR_LOCATION }}
+      # Get Username
+      - name: Get Username
+        run: gcloud auth list
+
+
+#  run_pr-template:
+#    name: PR - Build and Deploy
+#    uses: SecureApiGateway/secure-api-gateway-ci/.github/workflows/reusable-pr.yml@main
+#    secrets: inherit
+#    with:
+#      componentName: secure-api-gateway-functional-test-framework
+#      dockerTag: pr-${{ github.event.number }}
