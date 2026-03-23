@@ -9,7 +9,8 @@ on:
 jobs:
   run_pr-template:
     name: PR - Build and Deploy
-    uses: SecureApiGateway/secure-api-gateway-ci/.github/workflows/reusable-pr.yml@main
+    # Testing openig-9745 branch
+    uses: SecureApiGateway/secure-api-gateway-ci/.github/workflows/reusable-pr.yml@openig-9745
     secrets: inherit
     with:
       componentName: secure-api-gateway-functional-test-framework
