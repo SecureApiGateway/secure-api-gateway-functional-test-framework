@@ -16,7 +16,7 @@ val hopliteVersion = "2.9.0"
 
 plugins {
     // Apply the Kotlin JVM plugin to add support for Kotlin on the JVM.
-    id("org.jetbrains.kotlin.jvm") version "2.2.21"
+    id("org.jetbrains.kotlin.jvm") version "2.3.0"
     id("maven-publish")
 }
 
